@@ -6,6 +6,6 @@ import (
 )
 
 func Hello(ctx echo.Context) (err error) {
-	response := "Hello World!"
+	response := map[string]string{"msg": "Hello World!"}
 	return ctx.JSON(http.StatusOK, response)
 }
