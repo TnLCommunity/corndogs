@@ -1,0 +1,17 @@
+apiVersion: skaffold/v2beta23
+kind: Config
+build:
+  artifacts:
+    - image: skaffold-corndogs
+deploy:
+  helm:
+    releases:
+    - name: corndogs
+      chartPath: charts
+      namespace: skaffoldcorndogs
+      createNamespace: true
+      artifactOverrides:
+        image:
+          repository: skaffold-corndogs
+      valuesFiles:
+        - skaffold-values.yaml

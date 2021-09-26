@@ -1,0 +1,8 @@
+resources:
+  # Minimal dev env resources, up them if you want to do local load testing or something.
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
