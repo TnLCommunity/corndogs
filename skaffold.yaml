@@ -3,6 +3,11 @@ kind: Config
 build:
   artifacts:
     - image: skaffold-corndogs
+portForward:
+  - resourceType: deployment
+    resourceName: corndogs
+    port: 5080
+    localPort: 5080
 deploy:
   helm:
     releases:
@@ -11,7 +16,8 @@ deploy:
       namespace: skaffoldcorndogs
       createNamespace: true
       artifactOverrides:
-        image:
-          repository: skaffold-corndogs
+        image: skaffold-corndogs
+      imageStrategy:
+        helm: {}
       valuesFiles:
-        - skaffold-values.yaml
+        - charts/values.yaml
