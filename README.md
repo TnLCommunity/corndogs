@@ -8,6 +8,10 @@ Building a workflow. We are pre-alpha and not to be used for anything. Don't loo
 
 We are a deploy-first, CI/CD oriented project, and thus are working on deployment before feature work.
 
+### But why `Corndogs`?
+
+My coworker Charlie and I were talking about Celery and how it was an option for Python, and he said something along the lines of wanting corndogs instead.
+
 # Intended Design
 ## Data Structures
 
