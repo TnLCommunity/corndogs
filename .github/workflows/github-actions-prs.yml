@@ -33,7 +33,6 @@ jobs:
   pipeline:
     name: Build and Test with Skaffold Integration
     runs-on: ubuntu-latest
-    if: "always()"
     needs:
       - pr_name_check
     steps:
