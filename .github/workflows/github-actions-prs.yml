@@ -20,7 +20,7 @@ jobs:
         !contains(github.event.pull_request.head.ref, 'minor-') &&
         !contains(github.event.pull_request.head.ref, 'major-')
       run: |
-        echo "PR Name must begin with `patch-` `minor-` or `major-`"
+        echo "PR Name must begin with 'patch-' 'minor-' or 'major-'"
         exit 1
     - name: Check PR name
       if: |
