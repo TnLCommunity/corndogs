@@ -16,17 +16,17 @@ jobs:
     steps:
     - name: Check PR name
       if: |
-        !contains(github.event.pull_request.head.ref, 'patch-') &&
-        !contains(github.event.pull_request.head.ref, 'minor-') &&
-        !contains(github.event.pull_request.head.ref, 'major-')
+        !contains(github.event.pull_request.title, 'patch-') &&
+        !contains(github.event.pull_request.title, 'minor-') &&
+        !contains(github.event.pull_request.title, 'major-')
       run: |
         echo "PR Name must begin with 'patch-' 'minor-' or 'major-'"
         exit 1
     - name: Check PR name
       if: |
-        contains(github.event.pull_request.head.ref, 'patch-') ||
-        contains(github.event.pull_request.head.ref, 'minor-') ||
-        contains(github.event.pull_request.head.ref, 'major-')
+        contains(github.event.pull_request.title, 'patch-') ||
+        contains(github.event.pull_request.title, 'minor-') ||
+        contains(github.event.pull_request.title, 'major-')
       run: |
         echo "PR Name meets expectations"
         exit 0
