@@ -8,7 +8,7 @@ name: Bump Versions
 on:
   pull_request:
     types: [closed]
-    branches: [ $default-branch ]
+    branches: [ main ]
 
 jobs:
   bump_version_patch:
