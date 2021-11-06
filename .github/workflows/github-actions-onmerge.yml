@@ -3,12 +3,12 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Publish Docker image
+name: Bump Versions
 
 on:
   pull_request:
     types: [closed]
-    branches: [ $default-branch ]
+    branches: [ main ]
 
 jobs:
   bump_version_patch:
@@ -36,4 +36,4 @@ jobs:
         run: .github/scripts/bumpversion.sh major
         shell: bash
 
-# Does this succeed if no steps are run? - TodPunk
+# Does this succeed if no bump steps are run? - TodPunk
