@@ -6,14 +6,12 @@
 name: Publish Docker image
 
 on:
-  pull_request:
-    types: [opened, reopened, synchronize]
+  push:
     branches: [ main ]
 
 jobs:
   push_to_registry:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == 'true'
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2

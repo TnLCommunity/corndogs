@@ -13,6 +13,7 @@ on:
 jobs:
   bump_version_patch:
     name: Push Docker image to Docker Hub
+    if: github.event.pull_request.merged == 'true'
     runs-on: ubuntu-latest
     steps:
       # install bump2version
@@ -22,17 +23,17 @@ jobs:
           bumpversion -h
       # bump patch version
       - name: Bump patch version
-        if: "contains(github.payload.pull_request.head.ref, 'patch-')"
+        if: "contains(github.event.pull_request.head.ref, 'patch-')"
         run: .github/scripts/bumpversion.sh patch
         shell: bash
       # bump minor version
       - name: Bump minor version
-        if: "contains(github.payload.pull_request.head.ref, 'minor-')"
+        if: "contains(github.event.pull_request.head.ref, 'minor-')"
         run: .github/scripts/bumpversion.sh minor
         shell: bash
       # bump major version
       - name: Bump major version
-        if: "contains(github.payload.pull_request.head.ref, 'major-')"
+        if: "contains(github.event.pull_request.head.ref, 'major-')"
         run: .github/scripts/bumpversion.sh major
         shell: bash
 

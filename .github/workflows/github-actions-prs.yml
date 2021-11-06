@@ -6,12 +6,30 @@
 name: Go Build and Test
 on:
   pull_request:
+    types: [opened, reopened, synchronize]
     branches: [ main ]
 
 jobs:
+  pr_name_check:
+    name: Validate PR Name Expectations
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check PR name
+      if: "contains(github.event.pull_request.head.ref, 'patch-') && contains(github.event.pull_request.head.ref, 'minor-') && contains(github.event.pull_request.head.ref, 'major-')"
+      run: |
+        echo "PR Name must begin with `patch-` `minor-` or `major-`"
+        exit 1
+    - name: Check PR name
+      if: "contains(github.event.pull_request.head.ref, 'patch-') || contains(github.event.pull_request.head.ref, 'minor-') || contains(github.event.pull_request.head.ref, 'major-')"
+      run: |
+        echo "PR Name meets expectations"
+        exit 0
   pipeline:
     name: Build and Test with Skaffold Integration
     runs-on: ubuntu-latest
+    if: "always()"
+    needs:
+      - pr_name_check
     steps:
     - uses: actions/checkout@v2
     - name: Set up Go
