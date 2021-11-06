@@ -14,6 +14,11 @@ jobs:
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
     steps:
+      # install bump2version
+      - name: Install bump2version
+        run: |
+          pip install --upgrade bump2version
+          bumpversion -h
       # bump patch version
       - name: Bump patch version
         if: "contains(github.event.head_commit.message, 'patch-')"
