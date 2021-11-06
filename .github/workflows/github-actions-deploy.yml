@@ -6,37 +6,14 @@
 name: Publish Docker image
 
 on:
-  push:
+  pull_request:
+    types: [opened, reopened, synchronize]
     branches: [ $default-branch ]
 
 jobs:
-  bump_version_patch:
-    name: Push Docker image to Docker Hub
-    runs-on: ubuntu-latest
-    steps:
-      # bump patch version
-      - name: Bump patch version
-        if: "contains(github.event.head_commit.message, 'patch-')"
-        run: .github/scripts/bumpversion.sh patch
-        shell: bash
-      # bump minor version
-      - name: Bump minor version
-        if: "contains(github.event.head_commit.message, 'minor-')"
-        run: .github/scripts/bumpversion.sh minor
-        shell: bash
-      # bump major version
-      - name: Bump major version
-        if: "contains(github.event.head_commit.message, 'major-')"
-        run: .github/scripts/bumpversion.sh major
-        shell: bash
-
-# Does this succeed if no steps are run? - TodPunk
-
   push_to_registry:
     runs-on: ubuntu-latest
-    if: "always()"
-    needs:
-      - bump_version_patch
+    if: github.event.pull_request.merged == 'true'
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
