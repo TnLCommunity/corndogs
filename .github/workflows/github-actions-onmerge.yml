@@ -54,16 +54,16 @@ jobs:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-        with:
-          images: tnlcommunity/corndogs
+      - name: Get version
+        id: versionvar
+        run: echo ::set-output name=version::$(cat VERSION)
+      - name: Test output
+        run: echo ${{ steps.vars.outputs.version }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: "tnlcommunity/corndogs:latest, tnlcommunity/corndogs:${{ steps.versionvar.outputs.version }}"
+
