@@ -10,6 +10,8 @@ cd "$repoDirectory"
 git config user.name "$GITHUB_ACTOR"
 git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
+echo "Github actor: $GITHUB_ACTOR@users.noreply.github.com"
+
 # if it's a release, then checkout the specified tag
 if [[ $version == "release" ]]
 then
