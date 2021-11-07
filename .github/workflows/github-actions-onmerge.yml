@@ -12,6 +12,7 @@ on:
 
 jobs:
   bump_version_merge:
+    # This requires branch protection on main be disabled, so eventually we need to make a PR on a branch and merge that
     name: Bump Version on Merge
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
