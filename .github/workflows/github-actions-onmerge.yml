@@ -11,8 +11,8 @@ on:
     branches: [ main ]
 
 jobs:
-  bump_version_patch:
-    name: Push Docker image to Docker Hub
+  bump_version_merge:
+    name: Bump Version on Merge
     if: github.event.pull_request.merged == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -23,18 +23,46 @@ jobs:
           bumpversion -h
       # bump patch version
       - name: Bump patch version
-        if: "contains(github.event.pull_request.head.ref, 'patch-')"
+        if: contains(github.event.pull_request.title, 'patch-')
         run: .github/scripts/bumpversion.sh patch
         shell: bash
       # bump minor version
       - name: Bump minor version
-        if: "contains(github.event.pull_request.head.ref, 'minor-')"
+        if: contains(github.event.pull_request.title, 'minor-')
         run: .github/scripts/bumpversion.sh minor
         shell: bash
       # bump major version
       - name: Bump major version
-        if: "contains(github.event.pull_request.head.ref, 'major-')"
+        if: contains(github.event.pull_request.title, 'major-')
         run: .github/scripts/bumpversion.sh major
         shell: bash
 
 # Does this succeed if no bump steps are run? - TodPunk
+  push_to_registry:
+    name: Bump Version on Merge
+    runs-on: ubuntu-latest
+    needs:
+      - bump_version_merge
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: tnlcommunity/corndogs
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
