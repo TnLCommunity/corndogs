@@ -4,10 +4,22 @@ build:
   artifacts:
     - image: skaffold-corndogs
 portForward:
-  - resourceType: deployment
+  # pf for grpc server
+  - resourceType: service
     resourceName: corndogs
     port: 5080
     localPort: 5080
+  # pf for cockroach ui
+  - resourceType: service
+    resourceName: ingest-cockroachdb-public
+    namespace: ingest
+    port: 8080
+    localPort: 8082
+  # pf for cockroach connections via some sql client
+  - resourceType: service
+    resourceName: ingest-cockroachdb-public
+    namespace: ingest
+    port: 26257
 deploy:
   helm:
     releases:
@@ -15,9 +27,10 @@ deploy:
       chartPath: chart
       namespace: skaffoldcorndogs
       createNamespace: true
+      skipBuildDependencies: true
       artifactOverrides:
         image: skaffold-corndogs
       imageStrategy:
         helm: {}
       valuesFiles:
-        - chart/values.yaml
+        - chart/values-skaffold-local.yaml

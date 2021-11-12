@@ -1,0 +1,11 @@
+version: v1
+deps:
+  - buf.build/googleapis/googleapis
+lint:
+  use:
+    - DEFAULT
+  ignore:
+    - google/type/datetime.proto
+breaking:
+  use:
+    - FILE

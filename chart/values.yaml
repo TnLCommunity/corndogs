@@ -3,6 +3,7 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
+namespace: corndogs
 
 image:
   repository: corndogs
@@ -80,3 +81,23 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+database:
+  name: defaultdb
+  user: root
+  password: root
+  maxIdleConns: 10
+  maxOpenConns: 10
+  connMaxLifetimeSeconds: 3600
+  enableStatementCache: true
+  maxTransactionRetries: 1
+  options:
+    sslmode: disable
+  wait: true
+cockroachdb:
+  enabled: false
+  conf:
+    cluster-name: corndogs
+  storage:
+    persistentVolume:
+      enabled: false

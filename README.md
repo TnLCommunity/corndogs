@@ -26,6 +26,29 @@ If you want to contribute, just PR into the `main` branch with a branch name of 
 
 PRs that don't match that branch schema will be rejected, maybe with a reminder. This is because CI/CD won't even run the tests when we've got CI/CD setup.
 
+# Developing Without Kubernetes
+
+One can also develop without the full Kubernetes flow by doing the following to get a normal local Go workflow: 
+
+1. Install buf
+2. Install grpc go dependencies
+```
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+```
+3. Compile the protobufs, run the following in the project root, which should result in a `gen` directory being created, with compiled `.pb.go` files in it
+```
+buf generate
+```
+4. Run the server, run the following from the project root
+```
+go run server/main.go
+```
+5. Run the client, each run will make one request
+```
+go run client.main.go
+```
+
 # Intended Design
 ## Data Structures
 
