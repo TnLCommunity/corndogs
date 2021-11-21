@@ -6,7 +6,7 @@ import (
 	"github.com/TnLCommunity/corndogs/server/implementations"
 	"github.com/TnLCommunity/corndogs/server/logging"
 	"github.com/TnLCommunity/corndogs/server/store"
-	"github.com/TnLCommunity/corndogs/server/store/cockroachstore"
+	"github.com/TnLCommunity/corndogs/server/store/postgresstore"
 	"github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"google.golang.org/grpc/codes"
@@ -23,8 +23,8 @@ import (
 func main() {
 	// get logging setup
 	logging.InitLogging()
-	// use the cockroach store
-	store.SetStore(cockroachstore.CockroachStore{})
+	// use the postgres store
+	store.SetStore(postgresstore.PostgresStore{})
 	if err := run(); err != nil {
 		log.Fatal(err)
 	}
@@ -41,7 +41,7 @@ func run() error {
 		defer deferredFunc()
 	}
 	// create listener
-	listenOn := "0.0.0.0:8080"
+	listenOn := "0.0.0.0:5080"
 	listener, err := net.Listen("tcp", listenOn)
 	if err != nil {
 		return fmt.Errorf("failed to listen on %s: %w", listenOn, err)

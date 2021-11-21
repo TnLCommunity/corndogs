@@ -82,22 +82,22 @@ tolerations: []
 
 affinity: {}
 
+appconfig:
+  loglevel: "error"
+  prometheusEnabled: "false"
+
 database:
-  name: defaultdb
-  user: root
-  password: root
-  maxIdleConns: 10
-  maxOpenConns: 10
-  connMaxLifetimeSeconds: 3600
-  enableStatementCache: true
-  maxTransactionRetries: 1
-  options:
-    sslmode: disable
-  wait: true
-cockroachdb:
+  dbname: "defaultdb"
+  host: "postgres"
+  user: "postgres"
+  password: "changeme"
+  maxIdleConns: "10"
+  maxOpenConns: "10"
+  connMaxLifetimeSeconds: "3600"
+  tls:
+    enabled: false
+
+postgresql:
   enabled: false
-  conf:
-    cluster-name: corndogs
-  storage:
-    persistentVolume:
-      enabled: false
+  tls:
+    enabled: false

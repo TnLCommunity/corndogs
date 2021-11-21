@@ -8,7 +8,7 @@ appVersion: "0.1.2-alpha"
 
 
 dependencies:
-  - name: cockroachdb
-    version: 6.2.8
-    repository: https://charts.cockroachdb.com/
-    condition: cockroachdb.enabled
+  - name: postgresql
+    version: ~10.13.8
+    repository: https://charts.bitnami.com/bitnami/
+    condition: postgresql.enabled

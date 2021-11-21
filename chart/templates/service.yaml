@@ -8,8 +8,8 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: corndogshttp
+      targetPort: corndogsgrpc
       protocol: TCP
-      name: corndogshttp
+      name: corndogsgrpc
   selector:
     {{- include "corndogs.selectorLabels" . | nindent 4 }}
