@@ -29,7 +29,7 @@ func init() {
 		panic(err)
 	}
 	if nextTaskResponse.Task != nil {
-		panic(nextTaskResponse.Task)
+		panic(nextTaskResponse.Task.Uuid)
 	}
 }
 
@@ -44,7 +44,7 @@ func TestBasicFlow(t *testing.T) {
 	submitTaskRequest := &corndogsv1alpha1.SubmitTaskRequest{
 		Queue:           "testQueue"+testID,
 		CurrentState:    "testSubmitted",
-		AutoTargetState: gofakeit.Animal()+"Working",
+		AutoTargetState: gofakeit.Animal()+workingTaskSuffix,
 		Timeout:         -1, // No timeout
 		Payload:         testPayload,
 	}
@@ -84,7 +84,7 @@ func TestBasicFlow(t *testing.T) {
 	// Now get the updated task
 	getNextTaskRequest = &corndogsv1alpha1.GetNextTaskRequest{
 		Queue:           "testQueue"+testID,
-		CurrentState:    "testSubmitted-working",
+		CurrentState:    "testSubmitted-updated",
 	}
 	getNextTaskResponse, err = corndogsClient.GetNextTask(context.Background(), getNextTaskRequest)
 	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))

@@ -1,9 +1,5 @@
 package models
 
-import (
-	"encoding/json"
-)
-
 type Task struct {
 	UUID 			string `json:"uuid" gorm:"primaryKey"`
 	Queue           string `json:"queue"`
@@ -12,5 +8,5 @@ type Task struct {
 	SubmitTime 		int64 `json:"submit_time" gorm:"autoCreateTime:nano"`
 	UpdateTime 		int64 `json:"update_time" gorm:"autoUpdateTime:nano"`
 	Timeout    		int64 `json:"timeout"`
-	Payload 		json.RawMessage `json:"payload"`
+	Payload 		[]byte `json:"payload" gorm:"type:bytea"`
 }

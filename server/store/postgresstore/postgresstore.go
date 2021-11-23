@@ -8,6 +8,7 @@ import (
 	"github.com/TnLCommunity/corndogs/server/config"
 	"github.com/TnLCommunity/corndogs/server/store/postgresstore/models"
 	"github.com/TnLCommunity/corndogs/server/utils"
+	"github.com/google/uuid"
 	"github.com/pressly/goose/v3"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -60,8 +61,10 @@ func (s PostgresStore) Initialize() (func(), error) {
 
 func (s PostgresStore) SubmitTask(req *corndogsv1alpha1.SubmitTaskRequest) (*corndogsv1alpha1.SubmitTaskResponse, error) {
 	taskProto := &corndogsv1alpha1.Task{}
+	newUuid, _ := uuid.NewRandom()
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{
+			UUID: newUuid.String(),
 			Queue: req.Queue,
 			CurrentState: req.CurrentState,
 			AutoTargetState: req.AutoTargetState,
@@ -105,24 +108,109 @@ func (s PostgresStore) MustGetTaskStateByID(req *corndogsv1alpha1.GetTaskStateBy
 
 func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*corndogsv1alpha1.GetNextTaskResponse, error){
 	taskProto := &corndogsv1alpha1.Task{}
-	var err error
+	err := DB.Transaction(func(tx *gorm.DB) error {
+		model := models.Task{
+			Queue: req.Queue,
+			CurrentState: req.CurrentState,
+		}
+		result := DB.First(&model)
+		if result.Error != nil 	{
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				// not found return nil
+				taskProto = nil
+				return nil
+			} else {
+				return result.Error
+			}
+		}
+		// marshall result to response
+		return utils.StructToProto(model, taskProto)
+	})
 	return &corndogsv1alpha1.GetNextTaskResponse{Task: taskProto}, err
 }
 
+
 func (s PostgresStore) UpdateTask(req *corndogsv1alpha1.UpdateTaskRequest) (*corndogsv1alpha1.UpdateTaskResponse, error){
 	taskProto := &corndogsv1alpha1.Task{}
-	var err error
+	err := DB.Transaction(func(tx *gorm.DB) error {
+		model := models.Task{
+			UUID: req.Uuid,
+			Queue: req.Queue,
+		}
+		result := DB.First(&model)
+		if result.Error != nil 	{
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				// not found return nil
+				taskProto = nil
+				return nil
+			} else {
+				return result.Error
+			}
+		}
+		model.CurrentState = req.CurrentState
+		model.AutoTargetState = req.AutoTargetState
+		model.Timeout = req.Timeout
+		model.Payload = req.Payload
+		DB.Save(&model)
+		// marshall result to response
+		return utils.StructToProto(model, taskProto)
+	})
+
 	return &corndogsv1alpha1.UpdateTaskResponse{Task: taskProto}, err
 }
 
 func (s PostgresStore) CompleteTask(req *corndogsv1alpha1.CompleteTaskRequest) (*corndogsv1alpha1.CompleteTaskResponse, error){
 	taskProto := &corndogsv1alpha1.Task{}
-	var err error
+	err := DB.Transaction(func(tx *gorm.DB) error {
+		model := models.Task{
+			UUID: req.Uuid,
+			Queue: req.Queue,
+			CurrentState: req.CurrentState,
+		}
+		result := DB.First(&model)
+		if result.Error != nil 	{
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				// not found return nil
+				taskProto = nil
+				return nil
+			} else {
+				return result.Error
+			}
+		}
+		model.CurrentState = "complete"
+		model.AutoTargetState = "complete"
+		model.Timeout = 0
+		DB.Save(&model)
+		// marshall result to response
+		return utils.StructToProto(model, taskProto)
+	})
 	return &corndogsv1alpha1.CompleteTaskResponse{Task: taskProto}, err
 }
 
 func (s PostgresStore) CancelTask(req *corndogsv1alpha1.CancelTaskRequest) (*corndogsv1alpha1.CancelTaskResponse, error){
 	taskProto := &corndogsv1alpha1.Task{}
-	var err error
+	err := DB.Transaction(func(tx *gorm.DB) error {
+		model := models.Task{
+			UUID: req.Uuid,
+			Queue: req.Queue,
+			CurrentState: req.CurrentState,
+		}
+		result := DB.First(&model)
+		if result.Error != nil 	{
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				// not found return nil
+				taskProto = nil
+				return nil
+			} else {
+				return result.Error
+			}
+		}
+		model.CurrentState = "canceled"
+		model.AutoTargetState = "canceled"
+		model.Timeout = 0
+		DB.Save(&model)
+		// marshall result to response
+		return utils.StructToProto(model, taskProto)
+	})
 	return &corndogsv1alpha1.CancelTaskResponse{Task: taskProto}, err
 }

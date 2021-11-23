@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package corndogs.v1alpha1;
 
-message Task {
+message Task { // Use only in responses
   string uuid = 1;
   string queue = 2;
   string current_state = 3;
@@ -14,11 +14,11 @@ message Task {
 }
 
 message SubmitTaskRequest {
-  string queue = 2;
-  string current_state = 3;
-  string auto_target_state = 4;
-  int64 timeout = 7;
-  bytes payload = 8;
+  string queue = 1;
+  string current_state = 2;
+  string auto_target_state = 3;
+  int64 timeout = 4;
+  bytes payload = 5;
 }
 
 message SubmitTaskResponse {
@@ -27,6 +27,7 @@ message SubmitTaskResponse {
 
 message GetTaskStateByIDRequest {
   string uuid = 1;
+  string queue = 2;
 }
 
 message GetTaskStateResponse {
@@ -56,7 +57,10 @@ message UpdateTaskRequest {
   string uuid = 1;
   string queue = 2;
   string current_state = 3;
-  string new_state = 4;
+  string auto_target_state = 4;
+  int64 timeout = 5;
+  string new_state = 6;
+  bytes payload = 7;
 }
 
 message UpdateTaskResponse {

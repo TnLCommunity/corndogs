@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/brianvoe/gofakeit/v6 v6.9.0
+	github.com/google/uuid v1.1.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/pressly/goose/v3 v3.3.1
 	github.com/rs/zerolog v1.26.0

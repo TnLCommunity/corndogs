@@ -40,7 +40,7 @@ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 ```
 buf generate
 ```
-4. Run the server, run the following from the project root
+4. Run the server, run the following from the project root **after** setting environment variables for your database config
 ```
 go run server/main.go
 ```
@@ -77,7 +77,7 @@ This allows simple and complicated workflows, alongside workers dedicated to eac
 
 ## Supported datastores
 
-Current targets are Postgres and CockroachDB. The design is such that Corndogs should not know where it's storing things, it just gets pointed to a URL and picks up where it needs to. This is Cloud Native.
+Current targets are Postgres and room for others unplanned. The design is such that Corndogs should not know where it's storing things except in the Store implementation, it just gets pointed to a URL and picks up where it needs to. This is Cloud Native.
 
 ## Metrics and such
 
@@ -92,3 +92,4 @@ Aside from logs and Prometheus metrics, a number of endpoints should be provided
  * How many tasks completed in a time window? (This may allow historic views)
  * Length of time for tasks to be worked.
 
+These will be implemented after functionality is proven out.
