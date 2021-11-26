@@ -113,9 +113,16 @@ func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*c
 			Queue: req.Queue,
 			CurrentState: req.CurrentState,
 		}
-		result := DB.First(&model)
+		result := DB.Raw(
+			`SELECT * FROM tasks
+				 WHERE queue = ? AND current_state = ?
+				 SKIP LOCKED
+				 LIMIT 1`,
+				 req.Queue,
+				 req.CurrentState,
+			).Scan(&model)
 		if result.Error != nil 	{
-			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) || result.RowsAffected == 0 {
 				// not found return nil
 				taskProto = nil
 				return nil
