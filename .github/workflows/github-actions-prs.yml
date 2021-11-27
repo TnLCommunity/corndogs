@@ -42,42 +42,42 @@ jobs:
       with:
         go-version: 1.17
 # Commented out KinD and skaffold related work since it's slow right now and unneeded
-#    - uses: engineerd/setup-kind@v0.5.0
-#    - uses: yokawasa/action-setup-kube-tools@v0.7.1
-#      with:
-#        kubectl: '1.17.1'
-#        kustomize: '3.7.0'
-#        helm: '3.5.2'
-#        kubeval: '0.16.1'
-#        conftest: '0.18.2'
-#        rancher: '2.4.10'
-#        tilt: '0.18.11'
-#        skaffold: '1.20.0'
-#        kube-score: '1.10.1'
-#    - name: Testing
-#      run: |
-#        kubectl cluster-info
-#        kubectl version --client
-#        kustomize version
-#        helm version
-#        kubeval --version
-#        conftest --version
-#        yq --version
-#        rancher --version
-#        tilt version
-#        skaffold version
-#        kube-score version
-#        kubectl get pods -n kube-system
-#        echo "current-context:" $(kubectl config current-context)
-#        echo "environment-kubeconfig:" ${KUBECONFIG}
+    - uses: engineerd/setup-kind@v0.5.0
+    - uses: yokawasa/action-setup-kube-tools@v0.7.1
+      with:
+        kubectl: '1.17.1'
+        kustomize: '3.7.0'
+        helm: '3.5.2'
+        kubeval: '0.16.1'
+        conftest: '0.18.2'
+        rancher: '2.4.10'
+        tilt: '0.18.11'
+        skaffold: '1.20.0'
+        kube-score: '1.10.1'
+    - name: Testing
+      run: |
+        kubectl cluster-info
+        kubectl version --client
+        kustomize version
+        helm version
+        kubeval --version
+        conftest --version
+        yq --version
+        rancher --version
+        tilt version
+        skaffold version
+        kube-score version
+        kubectl get pods -n kube-system
+        echo "current-context:" $(kubectl config current-context)
+        echo "environment-kubeconfig:" ${KUBECONFIG}
+    - name: Run Skaffold as action
+      uses: hiberbee/github-action-skaffold@1.12.0
+      with:
+        command: run
     - name: Build Go
-      run: cd src && go build -v ./...
+      run: go build -v ./...
     - name: Test Go
-      run: cd src && go test -v ./...
-#    - name: Run Skaffold as action
-#      uses: hiberbee/github-action-skaffold@1.12.0
-#      with:
-#        command: run
+      run: go test -v ./...
 
 # Later we will also want to:
 #  - Install a postgres helm chart
