@@ -6,7 +6,7 @@ import (
 	"github.com/TnLCommunity/corndogs/server/store"
 )
 
-func (s *V1Alpha1Server) MustGetTaskStateByID(ctx context.Context, req *corndogsv1alpha1.GetTaskStateByIDRequest) *corndogsv1alpha1.GetTaskStateResponse {
+func (s *V1Alpha1Server) MustGetTaskStateByID(ctx context.Context, req *corndogsv1alpha1.GetTaskStateByIDRequest) *corndogsv1alpha1.GetTaskStateByIDResponse {
 	response := store.AppStore.MustGetTaskStateByID(req)
 	return response
 }
