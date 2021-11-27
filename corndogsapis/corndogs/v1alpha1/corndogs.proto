@@ -1,0 +1,90 @@
+syntax = "proto3";
+
+package corndogs.v1alpha1;
+
+message Task { // Use only in responses
+  string uuid = 1;
+  string queue = 2;
+  string current_state = 3;
+  string auto_target_state = 4;
+  int64 submit_time = 5;
+  int64 update_time = 6;
+  int64 timeout = 7;
+  bytes payload = 8;
+}
+
+message SubmitTaskRequest {
+  string queue = 1;
+  string current_state = 2;
+  string auto_target_state = 3;
+  int64 timeout = 4;
+  bytes payload = 5;
+}
+
+message SubmitTaskResponse {
+  Task task = 1;
+}
+
+message GetTaskStateByIDRequest {
+  string uuid = 1;
+  string queue = 2;
+}
+
+message GetTaskStateByIDResponse {
+  Task task = 1;
+}
+
+message GetNextTaskRequest {
+  string queue = 1;
+  string current_state = 2;
+  int64 timeout = 3;
+}
+
+message GetNextTaskResponse {
+  Task task = 1;
+}
+
+message CompleteTaskRequest {
+  string uuid = 1;
+  string queue = 2;
+  string current_state = 3;
+}
+
+message CompleteTaskResponse {
+  Task task = 1;
+}
+
+message UpdateTaskRequest {
+  string uuid = 1;
+  string queue = 2;
+  string current_state = 3;
+  string auto_target_state = 4;
+  int64 timeout = 5;
+  string new_state = 6;
+  bytes payload = 7;
+}
+
+message UpdateTaskResponse {
+  Task task = 1;
+}
+
+message CancelTaskRequest {
+  string uuid = 1;
+  string queue = 2;
+  string current_state = 3;
+}
+
+message CancelTaskResponse {
+  Task task = 1;
+}
+
+message EmptyRequest {}
+
+service CorndogsService {
+  rpc SubmitTask(SubmitTaskRequest) returns (SubmitTaskResponse) {}
+  rpc GetTaskStateByID(GetTaskStateByIDRequest) returns (GetTaskStateByIDResponse) {}
+  rpc GetNextTask(GetNextTaskRequest) returns (GetNextTaskResponse) {}
+  rpc UpdateTask(UpdateTaskRequest) returns (UpdateTaskResponse) {}
+  rpc CompleteTask(CompleteTaskRequest) returns (CompleteTaskResponse) {}
+  rpc CancelTask(CancelTaskRequest) returns (CancelTaskResponse) {}
+}

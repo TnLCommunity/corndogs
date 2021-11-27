@@ -3,6 +3,7 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
+namespace: corndogs
 
 image:
   repository: corndogs
@@ -80,3 +81,23 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+appconfig:
+  loglevel: "error"
+  prometheusEnabled: "false"
+
+database:
+  dbname: "defaultdb"
+  host: "postgres"
+  user: "postgres"
+  password: "changeme"
+  maxIdleConns: "10"
+  maxOpenConns: "10"
+  connMaxLifetimeSeconds: "3600"
+  tls:
+    enabled: false
+
+postgresql:
+  enabled: false
+  tls:
+    enabled: false

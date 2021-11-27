@@ -4,10 +4,16 @@ build:
   artifacts:
     - image: skaffold-corndogs
 portForward:
-  - resourceType: deployment
+  # pf for grpc server
+  - resourceType: service
     resourceName: corndogs
     port: 5080
     localPort: 5080
+  # pf for postgresdb
+  - resourceType: service
+    resourceName: corndogs-postgresql
+    port: 5432
+    localPort: 5432
 deploy:
   helm:
     releases:
@@ -15,9 +21,10 @@ deploy:
       chartPath: chart
       namespace: skaffoldcorndogs
       createNamespace: true
+      skipBuildDependencies: true
       artifactOverrides:
         image: skaffold-corndogs
       imageStrategy:
         helm: {}
       valuesFiles:
-        - chart/values.yaml
+        - chart/values-skaffold-local.yaml

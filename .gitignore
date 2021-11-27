@@ -17,3 +17,10 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+# Protobuf stuff
+gen/
+
+# Helm dependency stuff
+chart/Chart.lock
+chart/charts/
