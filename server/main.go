@@ -9,6 +9,7 @@ import (
 	"github.com/TnLCommunity/corndogs/server/store/postgresstore"
 	"github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	zlog "github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/status"
@@ -34,6 +35,7 @@ func run() error {
 	// initialize store
 	deferredFunc, err := store.AppStore.Initialize()
 	if err != nil {
+		zlog.Err(err)
 		panic(err)
 	}
 	// if the store has a deferred call, defer it

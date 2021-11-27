@@ -7,7 +7,7 @@ create table tasks (
                        submit_time bigint not null,
                        update_time bigint not null,
                        timeout bigint not null,
-                       payload bytea not null
+                       payload bytea
 );
 
 CREATE INDEX task_idx_queue ON tasks (queue);
@@ -21,7 +21,7 @@ create table archived_tasks (
                        current_state text not null,
                        auto_target_state text not null,
                        submit_time bigint not null,
-                       update_time bigint not null,
+                       update_time bigint not null
 );
 
 CREATE INDEX archived_task_idx_queue ON archived_tasks (queue);

@@ -37,6 +37,7 @@ message GetTaskStateResponse {
 message GetNextTaskRequest {
   string queue = 1;
   string current_state = 2;
+  int64 timeout = 3;
 }
 
 message GetNextTaskResponse {

@@ -10,6 +10,7 @@ import (
 	"github.com/TnLCommunity/corndogs/server/utils"
 	"github.com/google/uuid"
 	"github.com/pressly/goose/v3"
+	"github.com/rs/zerolog/log"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"time"
@@ -27,6 +28,8 @@ var DatabaseSSLMode = config.GetEnvOrDefault("DATABASE_SSL_MODE", "disable")
 var MaxIdleConns = config.GetEnvAsIntOrDefault("DATABASE_MAX_IDLE_CONNS", "1")
 var MaxOpenConns = config.GetEnvAsIntOrDefault("DATABASE_MAX_OPEN_CONNS", "10")
 var ConnMaxLifetime = time.Duration(config.GetEnvAsIntOrDefault("DATABASE_CONN_MAX_LIFETIME_SECONDS", "3600")) * time.Second
+var DefaultWorkingSuffix = "-working"
+
 
 // sql files embedded at compile time, used by goose
 //go:embed migrations/*.sql
@@ -62,6 +65,18 @@ func (s PostgresStore) Initialize() (func(), error) {
 func (s PostgresStore) SubmitTask(req *corndogsv1alpha1.SubmitTaskRequest) (*corndogsv1alpha1.SubmitTaskResponse, error) {
 	taskProto := &corndogsv1alpha1.Task{}
 	newUuid, _ := uuid.NewRandom()
+	if req.Queue == "" {
+		req.Queue = config.DefaultQueue
+	}
+	if req.CurrentState == "" {
+		req.CurrentState = "submitted"
+	}
+	if req.AutoTargetState == "" {
+		req.AutoTargetState = req.CurrentState + DefaultWorkingSuffix
+	}
+	if (req.Timeout < 0) {
+		req.Timeout = 0
+	}
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{
 			UUID: newUuid.String(),
@@ -73,6 +88,7 @@ func (s PostgresStore) SubmitTask(req *corndogsv1alpha1.SubmitTaskRequest) (*cor
 		}
 		result := DB.Create(&model)
 		if result.Error != nil {
+			log.Err(result.Error)
 			return result.Error
 		}
 		// marshall result to response
@@ -89,10 +105,21 @@ func (s PostgresStore) MustGetTaskStateByID(req *corndogsv1alpha1.GetTaskStateBy
 			result := DB.First(&model)
 			if result.Error != nil {
 				if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-					// not found return nil
-					taskProto = nil
-					return nil
+					archived_model := models.ArchivedTask{UUID: req.Uuid}
+					archived_result := DB.First(&archived_model)
+					if archived_result.Error != nil {
+						if errors.Is(archived_result.Error, gorm.ErrRecordNotFound) {
+							// not found return nil
+							taskProto = nil
+							return nil
+						} else {
+							log.Err(result.Error)
+							return archived_result.Error
+						}
+					}
+					return utils.StructToProto(archived_model, taskProto)
 				} else {
+					log.Err(result.Error)
 					return result.Error
 				}
 			}
@@ -101,48 +128,124 @@ func (s PostgresStore) MustGetTaskStateByID(req *corndogsv1alpha1.GetTaskStateBy
 		},
 	)
 	if err != nil {
+		log.Err(err)
 		panic(err)
 	}
 	return &corndogsv1alpha1.GetTaskStateResponse{Task: taskProto}
 }
 
 func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*corndogsv1alpha1.GetNextTaskResponse, error){
+	// TODO: This may be something that can be simplified, determine that and do so or explain why it can't
 	taskProto := &corndogsv1alpha1.Task{}
+	if req.Queue == "" {
+		req.Queue = config.DefaultQueue
+	}
+	if req.CurrentState == "" {
+		req.CurrentState = "submitted"
+	}
 	err := DB.Transaction(func(tx *gorm.DB) error {
-		model := models.Task{
-			Queue: req.Queue,
-			CurrentState: req.CurrentState,
-		}
+		model := models.Task{}
+		var nextUuid string
 		result := DB.Raw(
-			`SELECT * FROM tasks
-				 WHERE queue = ? AND current_state = ?
-				 SKIP LOCKED
-				 LIMIT 1`,
+			`UPDATE tasks SET current_state = current_state || '-updating'
+				 WHERE uuid = (
+					 SELECT uuid FROM tasks
+					 WHERE queue = ? AND current_state = ?
+                     ORDER BY update_time DESC
+					 FOR UPDATE SKIP LOCKED
+					 LIMIT 1)
+				 RETURNING uuid`,
 				 req.Queue,
 				 req.CurrentState,
-			).Scan(&model)
+			)
 		if result.Error != nil 	{
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) || result.RowsAffected == 0 {
 				// not found return nil
 				taskProto = nil
 				return nil
 			} else {
+				log.Err(result.Error)
+				return result.Error
+			}
+		}
+		result.Scan(&nextUuid)
+		if result.Error != nil 	{
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) || result.RowsAffected == 0 {
+				// not found return nil
+				taskProto = nil
+				return nil
+			} else {
+				log.Err(result.Error)
+				return result.Error
+			}
+		}
+		if nextUuid == "" {
+			// not found return nil
+			taskProto = nil
+			return nil
+		}
+		model.UUID = nextUuid
+		result = DB.First(&model)
+		if result.Error != nil 	{
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) || result.RowsAffected == 0 {
+				// not found return nil
+				taskProto = nil
+				return nil
+			} else {
+				log.Err(result.Error)
+				return result.Error
+			}
+		}
+		// swap states so if a timeout occurs we set them back to what they were
+		model.CurrentState = model.AutoTargetState
+		model.AutoTargetState = req.CurrentState
+		if req.Timeout != 0 {
+			// Since protobuf default int values are 0, if they wanted 0, they have to send a negative value
+			// which is otherwise invalid as a timeout
+			if req.Timeout < 0 {
+				model.Timeout = 0
+			} else {
+				model.Timeout = req.Timeout
+			}
+		}
+		result = DB.Save(model)
+		if result.Error != nil 	{
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) || result.RowsAffected == 0 {
+				// not found return nil
+				taskProto = nil
+				return nil
+			} else {
+				log.Err(result.Error)
 				return result.Error
 			}
 		}
 		// marshall result to response
 		return utils.StructToProto(model, taskProto)
 	})
+	if err != nil {
+		log.Err(err)
+		panic(err)
+	}
 	return &corndogsv1alpha1.GetNextTaskResponse{Task: taskProto}, err
 }
 
 
 func (s PostgresStore) UpdateTask(req *corndogsv1alpha1.UpdateTaskRequest) (*corndogsv1alpha1.UpdateTaskResponse, error){
 	taskProto := &corndogsv1alpha1.Task{}
+	if req.CurrentState == "" {
+		req.CurrentState = "submitted"
+	}
+	if req.NewState == "" {
+		req.NewState = "updated"
+	}
+	if req.AutoTargetState == "" {
+		req.AutoTargetState = req.NewState + DefaultWorkingSuffix
+	}
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{
 			UUID: req.Uuid,
 			Queue: req.Queue,
+			CurrentState: req.CurrentState,
 		}
 		result := DB.First(&model)
 		if result.Error != nil 	{
@@ -151,17 +254,34 @@ func (s PostgresStore) UpdateTask(req *corndogsv1alpha1.UpdateTaskRequest) (*cor
 				taskProto = nil
 				return nil
 			} else {
+				log.Err(result.Error)
 				return result.Error
 			}
 		}
-		model.CurrentState = req.CurrentState
+		model.CurrentState = req.NewState
 		model.AutoTargetState = req.AutoTargetState
 		model.Timeout = req.Timeout
-		model.Payload = req.Payload
-		DB.Save(&model)
+		if len(req.Payload) > 0 {
+			model.Payload = req.Payload
+		}
+		result = DB.Save(&model)
+		if result.Error != nil 	{
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				// not found return nil
+				taskProto = nil
+				return nil
+			} else {
+				log.Err(result.Error)
+				return result.Error
+			}
+		}
 		// marshall result to response
 		return utils.StructToProto(model, taskProto)
 	})
+	if err != nil {
+		log.Err(err)
+		panic(err)
+	}
 
 	return &corndogsv1alpha1.UpdateTaskResponse{Task: taskProto}, err
 }
@@ -181,16 +301,28 @@ func (s PostgresStore) CompleteTask(req *corndogsv1alpha1.CompleteTaskRequest) (
 				taskProto = nil
 				return nil
 			} else {
+				log.Err(result.Error)
 				return result.Error
 			}
 		}
-		model.CurrentState = "complete"
-		model.AutoTargetState = "complete"
-		model.Timeout = 0
-		DB.Save(&model)
+		archiveModel := models.ConvertTaskForArchive(model)
+		archiveModel.CurrentState = "completed"
+		archiveModel.AutoTargetState = "completed"
+		result = DB.Create(&archiveModel)
+		if result.Error != nil {
+			return result.Error
+		}
+		result = DB.Delete(&model)
+		if result.Error != nil {
+			return result.Error
+		}
 		// marshall result to response
-		return utils.StructToProto(model, taskProto)
+		return utils.StructToProto(archiveModel, taskProto)
 	})
+	if err != nil {
+		log.Err(err)
+		panic(err)
+	}
 	return &corndogsv1alpha1.CompleteTaskResponse{Task: taskProto}, err
 }
 
@@ -209,15 +341,29 @@ func (s PostgresStore) CancelTask(req *corndogsv1alpha1.CancelTaskRequest) (*cor
 				taskProto = nil
 				return nil
 			} else {
+				log.Err(result.Error)
 				return result.Error
 			}
 		}
-		model.CurrentState = "canceled"
-		model.AutoTargetState = "canceled"
-		model.Timeout = 0
-		DB.Save(&model)
+		archiveModel := models.ConvertTaskForArchive(model)
+		archiveModel.CurrentState = "canceled"
+		archiveModel.AutoTargetState = "canceled"
+		result = DB.Create(&archiveModel)
+		if result.Error != nil {
+			log.Err(result.Error)
+			return result.Error
+		}
+		result = DB.Delete(&model)
+		if result.Error != nil {
+			log.Err(result.Error)
+			return result.Error
+		}
 		// marshall result to response
-		return utils.StructToProto(model, taskProto)
+		return utils.StructToProto(archiveModel, taskProto)
 	})
+	if err != nil {
+		log.Err(err)
+		panic(err)
+	}
 	return &corndogsv1alpha1.CancelTaskResponse{Task: taskProto}, err
 }
