@@ -30,7 +30,7 @@ message GetTaskStateByIDRequest {
   string queue = 2;
 }
 
-message GetTaskStateResponse {
+message GetTaskStateByIDResponse {
   Task task = 1;
 }
 
@@ -82,7 +82,7 @@ message EmptyRequest {}
 
 service CorndogsService {
   rpc SubmitTask(SubmitTaskRequest) returns (SubmitTaskResponse) {}
-  rpc GetTaskStateByID(GetTaskStateByIDRequest) returns (GetTaskStateResponse) {}
+  rpc GetTaskStateByID(GetTaskStateByIDRequest) returns (GetTaskStateByIDResponse) {}
   rpc GetNextTask(GetNextTaskRequest) returns (GetNextTaskResponse) {}
   rpc UpdateTask(UpdateTaskRequest) returns (UpdateTaskResponse) {}
   rpc CompleteTask(CompleteTaskRequest) returns (CompleteTaskResponse) {}
