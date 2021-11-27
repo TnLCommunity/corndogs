@@ -78,6 +78,6 @@ jobs:
         command: run
     - name: Run tests
       run: |
-        kubectl -n corndogs port-forward svc/corndogs 5080 &
+        kubectl -n skaffoldcorndogs port-forward svc/corndogs 5080 &
         go test -v ./...
 
