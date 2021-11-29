@@ -10,6 +10,7 @@ var FlushBytes = int64(GetEnvAsIntOrDefault("FLUSH_BYTES", "1000"))
 var PrometheusEnabled = GetEnvAsBoolOrDefault("PROMETHEUS_ENABLED", "false")
 var DefaultQueue = GetEnvOrDefault("DEFAULT_QUEUE", "default")
 var DefaultStartingState = GetEnvOrDefault("DEFAULT_STARTING_STATE", "submitted")
+var RequestIdHeader = GetEnvOrDefault("REQUEST_ID_HEADER", "X-Request-ID")
 
 func GetEnvOrDefault(env, defaultValue string) string {
 	value := os.Getenv(env)
