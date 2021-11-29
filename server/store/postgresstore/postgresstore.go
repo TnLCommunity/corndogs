@@ -6,8 +6,8 @@ import (
 	"fmt"
 	corndogsv1alpha1 "github.com/TnLCommunity/corndogs/gen/proto/go/corndogs/v1alpha1"
 	"github.com/TnLCommunity/corndogs/server/config"
+	"github.com/TnLCommunity/corndogs/server/conversions"
 	"github.com/TnLCommunity/corndogs/server/store/postgresstore/models"
-	"github.com/TnLCommunity/corndogs/server/utils"
 	"github.com/google/uuid"
 	"github.com/pressly/goose/v3"
 	"github.com/rs/zerolog/log"
@@ -69,7 +69,7 @@ func (s PostgresStore) SubmitTask(req *corndogsv1alpha1.SubmitTaskRequest) (*cor
 		req.Queue = config.DefaultQueue
 	}
 	if req.CurrentState == "" {
-		req.CurrentState = "submitted"
+		req.CurrentState = config.DefaultStartingState
 	}
 	if req.AutoTargetState == "" {
 		req.AutoTargetState = req.CurrentState + DefaultWorkingSuffix
@@ -92,7 +92,7 @@ func (s PostgresStore) SubmitTask(req *corndogsv1alpha1.SubmitTaskRequest) (*cor
 			return result.Error
 		}
 		// marshall result to response
-		return utils.StructToProto(model, taskProto)
+		return conversions.StructToProto(model, taskProto)
 	})
 
 	return &corndogsv1alpha1.SubmitTaskResponse{Task: taskProto}, err
@@ -117,14 +117,14 @@ func (s PostgresStore) MustGetTaskStateByID(req *corndogsv1alpha1.GetTaskStateBy
 							return archived_result.Error
 						}
 					}
-					return utils.StructToProto(archived_model, taskProto)
+					return conversions.StructToProto(archived_model, taskProto)
 				} else {
 					log.Err(result.Error)
 					return result.Error
 				}
 			}
 			// marshall result to response
-			return utils.StructToProto(model, taskProto)
+			return conversions.StructToProto(model, taskProto)
 		},
 	)
 	if err != nil {
@@ -141,7 +141,7 @@ func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*c
 		req.Queue = config.DefaultQueue
 	}
 	if req.CurrentState == "" {
-		req.CurrentState = "submitted"
+		req.CurrentState = config.DefaultStartingState
 	}
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{}
@@ -220,7 +220,7 @@ func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*c
 			}
 		}
 		// marshall result to response
-		return utils.StructToProto(model, taskProto)
+		return conversions.StructToProto(model, taskProto)
 	})
 	if err != nil {
 		log.Err(err)
@@ -233,7 +233,7 @@ func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*c
 func (s PostgresStore) UpdateTask(req *corndogsv1alpha1.UpdateTaskRequest) (*corndogsv1alpha1.UpdateTaskResponse, error){
 	taskProto := &corndogsv1alpha1.Task{}
 	if req.CurrentState == "" {
-		req.CurrentState = "submitted"
+		req.CurrentState = config.DefaultStartingState
 	}
 	if req.NewState == "" {
 		req.NewState = "updated"
@@ -276,7 +276,7 @@ func (s PostgresStore) UpdateTask(req *corndogsv1alpha1.UpdateTaskRequest) (*cor
 			}
 		}
 		// marshall result to response
-		return utils.StructToProto(model, taskProto)
+		return conversions.StructToProto(model, taskProto)
 	})
 	if err != nil {
 		log.Err(err)
@@ -317,7 +317,7 @@ func (s PostgresStore) CompleteTask(req *corndogsv1alpha1.CompleteTaskRequest) (
 			return result.Error
 		}
 		// marshall result to response
-		return utils.StructToProto(archiveModel, taskProto)
+		return conversions.StructToProto(archiveModel, taskProto)
 	})
 	if err != nil {
 		log.Err(err)
@@ -359,7 +359,7 @@ func (s PostgresStore) CancelTask(req *corndogsv1alpha1.CancelTaskRequest) (*cor
 			return result.Error
 		}
 		// marshall result to response
-		return utils.StructToProto(archiveModel, taskProto)
+		return conversions.StructToProto(archiveModel, taskProto)
 	})
 	if err != nil {
 		log.Err(err)
