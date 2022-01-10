@@ -1,7 +1,7 @@
 
 appconfig:
   loglevel: "error"
-  prometheusEnabled: "false"
+  prometheusEnabled: false
 
 database:
   dbname: "localcorndogsdev"
