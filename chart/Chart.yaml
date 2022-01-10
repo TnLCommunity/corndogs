@@ -12,3 +12,7 @@ dependencies:
     version: ~10.13.8
     repository: https://charts.bitnami.com/bitnami/
     condition: postgresql.enabled
+  - name: prometheus
+    version: ~15.0.2
+    repository: https://prometheus-community.github.io/helm-charts
+    condition: appconfig.prometheusEnabled
