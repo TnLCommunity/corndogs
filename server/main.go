@@ -2,19 +2,23 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"net"
+
 	corndogsv1alpha1 "github.com/TnLCommunity/corndogs/gen/proto/go/corndogs/v1alpha1"
+	"github.com/TnLCommunity/corndogs/server/config"
 	"github.com/TnLCommunity/corndogs/server/implementations"
 	"github.com/TnLCommunity/corndogs/server/logging"
+	"github.com/TnLCommunity/corndogs/server/metrics"
 	"github.com/TnLCommunity/corndogs/server/store"
 	"github.com/TnLCommunity/corndogs/server/store/postgresstore"
-	"github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	zlog "github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/status"
-	"log"
-	"net"
 
 	// This import path is based on the name declaration in the go.mod,
 	// and the gen/proto/go output location in the buf.gen.yaml.
@@ -57,17 +61,32 @@ func run() error {
 		}),
 	}
 	// create grpc server
+	var grpcChain grpc.UnaryServerInterceptor
+	if config.PrometheusEnabled {
+		grpcChain = grpc_middleware.ChainUnaryServer(
+			grpc_recovery.UnaryServerInterceptor(opts...),
+			grpc_prometheus.UnaryServerInterceptor,
+		)
+	} else {
+		grpcChain = grpc_middleware.ChainUnaryServer(
+			grpc_recovery.UnaryServerInterceptor(opts...),
+		)
+	}
 	server := grpc.NewServer(
 		grpc.UnaryInterceptor(
-			grpc_middleware.ChainUnaryServer(
-				grpc_recovery.UnaryServerInterceptor(opts...),
-			),
+			grpcChain,
 		),
 	)
 
 	// register ingest service
 	corndogsv1alpha1.RegisterCorndogsServiceServer(server, &implementations.V1Alpha1Server{})
 
+	if config.PrometheusEnabled {
+		grpc_prometheus.EnableHandlingTimeHistogram()
+		// register server with grpc_prometheus
+		grpc_prometheus.Register(server)
+		metrics.StartMetricsEndpoint()
+	}
 	// register health service (used in k8s health checks)
 	healthService := implementations.NewHealthChecker()
 	grpc_health_v1.RegisterHealthServer(server, healthService)
