@@ -4,16 +4,17 @@ import (
 	"embed"
 	"errors"
 	"fmt"
-	corndogsv1alpha1 "github.com/TnLCommunity/corndogs/gen/proto/go/corndogs/v1alpha1"
+	"time"
+
 	"github.com/TnLCommunity/corndogs/server/config"
 	"github.com/TnLCommunity/corndogs/server/conversions"
 	"github.com/TnLCommunity/corndogs/server/store/postgresstore/models"
+	corndogsv1alpha1 "github.com/TnLCommunity/protos-corndogs/gen/proto/go/corndogs/v1alpha1"
 	"github.com/google/uuid"
 	"github.com/pressly/goose/v3"
 	"github.com/rs/zerolog/log"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"time"
 )
 
 // global db
@@ -29,7 +30,6 @@ var MaxIdleConns = config.GetEnvAsIntOrDefault("DATABASE_MAX_IDLE_CONNS", "1")
 var MaxOpenConns = config.GetEnvAsIntOrDefault("DATABASE_MAX_OPEN_CONNS", "10")
 var ConnMaxLifetime = time.Duration(config.GetEnvAsIntOrDefault("DATABASE_CONN_MAX_LIFETIME_SECONDS", "3600")) * time.Second
 var DefaultWorkingSuffix = "-working"
-
 
 // sql files embedded at compile time, used by goose
 //go:embed migrations/*.sql
@@ -74,17 +74,17 @@ func (s PostgresStore) SubmitTask(req *corndogsv1alpha1.SubmitTaskRequest) (*cor
 	if req.AutoTargetState == "" {
 		req.AutoTargetState = req.CurrentState + DefaultWorkingSuffix
 	}
-	if (req.Timeout < 0) {
+	if req.Timeout < 0 {
 		req.Timeout = 0
 	}
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{
-			UUID: newUuid.String(),
-			Queue: req.Queue,
-			CurrentState: req.CurrentState,
+			UUID:            newUuid.String(),
+			Queue:           req.Queue,
+			CurrentState:    req.CurrentState,
 			AutoTargetState: req.AutoTargetState,
-			Timeout: req.Timeout,
-			Payload: req.Payload,
+			Timeout:         req.Timeout,
+			Payload:         req.Payload,
 		}
 		result := DB.Create(&model)
 		if result.Error != nil {
@@ -98,34 +98,34 @@ func (s PostgresStore) SubmitTask(req *corndogsv1alpha1.SubmitTaskRequest) (*cor
 	return &corndogsv1alpha1.SubmitTaskResponse{Task: taskProto}, err
 }
 
-func (s PostgresStore) MustGetTaskStateByID(req *corndogsv1alpha1.GetTaskStateByIDRequest) *corndogsv1alpha1.GetTaskStateByIDResponse{
+func (s PostgresStore) MustGetTaskStateByID(req *corndogsv1alpha1.GetTaskStateByIDRequest) *corndogsv1alpha1.GetTaskStateByIDResponse {
 	taskProto := &corndogsv1alpha1.Task{}
 	err := DB.Transaction(func(tx *gorm.DB) error {
-			model := models.Task{UUID: req.Uuid}
-			result := DB.First(&model)
-			if result.Error != nil {
-				if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-					archived_model := models.ArchivedTask{UUID: req.Uuid}
-					archived_result := DB.First(&archived_model)
-					if archived_result.Error != nil {
-						if errors.Is(archived_result.Error, gorm.ErrRecordNotFound) {
-							// not found return nil
-							taskProto = nil
-							return nil
-						} else {
-							log.Err(result.Error)
-							return archived_result.Error
-						}
+		model := models.Task{UUID: req.Uuid}
+		result := DB.First(&model)
+		if result.Error != nil {
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				archived_model := models.ArchivedTask{UUID: req.Uuid}
+				archived_result := DB.First(&archived_model)
+				if archived_result.Error != nil {
+					if errors.Is(archived_result.Error, gorm.ErrRecordNotFound) {
+						// not found return nil
+						taskProto = nil
+						return nil
+					} else {
+						log.Err(result.Error)
+						return archived_result.Error
 					}
-					return conversions.StructToProto(archived_model, taskProto)
-				} else {
-					log.Err(result.Error)
-					return result.Error
 				}
+				return conversions.StructToProto(archived_model, taskProto)
+			} else {
+				log.Err(result.Error)
+				return result.Error
 			}
-			// marshall result to response
-			return conversions.StructToProto(model, taskProto)
-		},
+		}
+		// marshall result to response
+		return conversions.StructToProto(model, taskProto)
+	},
 	)
 	if err != nil {
 		log.Err(err)
@@ -134,7 +134,7 @@ func (s PostgresStore) MustGetTaskStateByID(req *corndogsv1alpha1.GetTaskStateBy
 	return &corndogsv1alpha1.GetTaskStateByIDResponse{Task: taskProto}
 }
 
-func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*corndogsv1alpha1.GetNextTaskResponse, error){
+func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*corndogsv1alpha1.GetNextTaskResponse, error) {
 	// TODO: This may be something that can be simplified, determine that and do so or explain why it can't
 	taskProto := &corndogsv1alpha1.Task{}
 	if req.Queue == "" {
@@ -155,10 +155,10 @@ func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*c
 					 FOR UPDATE SKIP LOCKED
 					 LIMIT 1)
 				 RETURNING uuid`,
-				 req.Queue,
-				 req.CurrentState,
-			)
-		if result.Error != nil 	{
+			req.Queue,
+			req.CurrentState,
+		)
+		if result.Error != nil {
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) || result.RowsAffected == 0 {
 				// not found return nil
 				taskProto = nil
@@ -169,7 +169,7 @@ func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*c
 			}
 		}
 		result.Scan(&nextUuid)
-		if result.Error != nil 	{
+		if result.Error != nil {
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) || result.RowsAffected == 0 {
 				// not found return nil
 				taskProto = nil
@@ -186,7 +186,7 @@ func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*c
 		}
 		model.UUID = nextUuid
 		result = DB.First(&model)
-		if result.Error != nil 	{
+		if result.Error != nil {
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) || result.RowsAffected == 0 {
 				// not found return nil
 				taskProto = nil
@@ -209,7 +209,7 @@ func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*c
 			}
 		}
 		result = DB.Save(model)
-		if result.Error != nil 	{
+		if result.Error != nil {
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) || result.RowsAffected == 0 {
 				// not found return nil
 				taskProto = nil
@@ -229,8 +229,7 @@ func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*c
 	return &corndogsv1alpha1.GetNextTaskResponse{Task: taskProto}, err
 }
 
-
-func (s PostgresStore) UpdateTask(req *corndogsv1alpha1.UpdateTaskRequest) (*corndogsv1alpha1.UpdateTaskResponse, error){
+func (s PostgresStore) UpdateTask(req *corndogsv1alpha1.UpdateTaskRequest) (*corndogsv1alpha1.UpdateTaskResponse, error) {
 	taskProto := &corndogsv1alpha1.Task{}
 	if req.CurrentState == "" {
 		req.CurrentState = config.DefaultStartingState
@@ -243,12 +242,12 @@ func (s PostgresStore) UpdateTask(req *corndogsv1alpha1.UpdateTaskRequest) (*cor
 	}
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{
-			UUID: req.Uuid,
-			Queue: req.Queue,
+			UUID:         req.Uuid,
+			Queue:        req.Queue,
 			CurrentState: req.CurrentState,
 		}
 		result := DB.First(&model)
-		if result.Error != nil 	{
+		if result.Error != nil {
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 				// not found return nil
 				taskProto = nil
@@ -265,7 +264,7 @@ func (s PostgresStore) UpdateTask(req *corndogsv1alpha1.UpdateTaskRequest) (*cor
 			model.Payload = req.Payload
 		}
 		result = DB.Save(&model)
-		if result.Error != nil 	{
+		if result.Error != nil {
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 				// not found return nil
 				taskProto = nil
@@ -286,16 +285,16 @@ func (s PostgresStore) UpdateTask(req *corndogsv1alpha1.UpdateTaskRequest) (*cor
 	return &corndogsv1alpha1.UpdateTaskResponse{Task: taskProto}, err
 }
 
-func (s PostgresStore) CompleteTask(req *corndogsv1alpha1.CompleteTaskRequest) (*corndogsv1alpha1.CompleteTaskResponse, error){
+func (s PostgresStore) CompleteTask(req *corndogsv1alpha1.CompleteTaskRequest) (*corndogsv1alpha1.CompleteTaskResponse, error) {
 	taskProto := &corndogsv1alpha1.Task{}
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{
-			UUID: req.Uuid,
-			Queue: req.Queue,
+			UUID:         req.Uuid,
+			Queue:        req.Queue,
 			CurrentState: req.CurrentState,
 		}
 		result := DB.First(&model)
-		if result.Error != nil 	{
+		if result.Error != nil {
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 				// not found return nil
 				taskProto = nil
@@ -326,16 +325,16 @@ func (s PostgresStore) CompleteTask(req *corndogsv1alpha1.CompleteTaskRequest) (
 	return &corndogsv1alpha1.CompleteTaskResponse{Task: taskProto}, err
 }
 
-func (s PostgresStore) CancelTask(req *corndogsv1alpha1.CancelTaskRequest) (*corndogsv1alpha1.CancelTaskResponse, error){
+func (s PostgresStore) CancelTask(req *corndogsv1alpha1.CancelTaskRequest) (*corndogsv1alpha1.CancelTaskResponse, error) {
 	taskProto := &corndogsv1alpha1.Task{}
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{
-			UUID: req.Uuid,
-			Queue: req.Queue,
+			UUID:         req.Uuid,
+			Queue:        req.Queue,
 			CurrentState: req.CurrentState,
 		}
 		result := DB.First(&model)
-		if result.Error != nil 	{
+		if result.Error != nil {
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 				// not found return nil
 				taskProto = nil

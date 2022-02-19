@@ -3,12 +3,13 @@ package test
 import (
 	"context"
 	"fmt"
-	corndogsv1alpha1 "github.com/TnLCommunity/corndogs/gen/proto/go/corndogs/v1alpha1"
-	"github.com/brianvoe/gofakeit/v6"
-	"github.com/stretchr/testify/require"
 	"math/rand"
 	"testing"
 	"time"
+
+	corndogsv1alpha1 "github.com/TnLCommunity/protos-corndogs/gen/proto/go/corndogs/v1alpha1"
+	"github.com/brianvoe/gofakeit/v6"
+	"github.com/stretchr/testify/require"
 
 	// This import path is based on the name declaration in the go.mod,
 	// and the gen/proto/go output location in the buf.gen.yaml.
@@ -22,7 +23,7 @@ var testID = gofakeit.Breakfast() + gofakeit.Dessert()
 func init() {
 	// Get the next task in the test_via_core_corndogs_repo queue, which should be none
 	getNextRequest := &corndogsv1alpha1.GetNextTaskRequest{
-		Queue: "testQueue"+testID,
+		Queue:        "testQueue" + testID,
 		CurrentState: "submitted",
 	}
 	nextTaskResponse, err := client.GetNextTask(context.Background(), getNextRequest)
@@ -38,13 +39,13 @@ func TestBasicFlow(t *testing.T) {
 	corndogsClient := GetCorndogsClient()
 	rand.Seed(time.Now().UnixNano())
 	workingTaskSuffix := "-working"
-	testPayload := []byte("testPayload"+testID)
+	testPayload := []byte("testPayload" + testID)
 
 	// Differentiate values so they can be run multiple at a time on a live environment easily
 	submitTaskRequest := &corndogsv1alpha1.SubmitTaskRequest{
-		Queue:           "testQueue"+testID,
+		Queue:           "testQueue" + testID,
 		CurrentState:    "testSubmitted",
-		AutoTargetState: "testSubmitted"+workingTaskSuffix,
+		AutoTargetState: "testSubmitted" + workingTaskSuffix,
 		Timeout:         -1, // No timeout
 		Payload:         testPayload,
 	}
@@ -57,8 +58,8 @@ func TestBasicFlow(t *testing.T) {
 	require.NotEmpty(t, submitTaskResponse.Task.Uuid, "uuid should not be empty")
 
 	getNextTaskRequest := &corndogsv1alpha1.GetNextTaskRequest{
-		Queue:           "testQueue"+testID,
-		CurrentState:    "testSubmitted",
+		Queue:        "testQueue" + testID,
+		CurrentState: "testSubmitted",
 	}
 	getNextTaskResponse, err := corndogsClient.GetNextTask(context.Background(), getNextTaskRequest)
 	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
@@ -67,13 +68,13 @@ func TestBasicFlow(t *testing.T) {
 	require.NotEmpty(t, getNextTaskResponse.Task.SubmitTime, "submit_time should not be empty")
 	require.NotEmpty(t, getNextTaskResponse.Task.UpdateTime, "update_time should not be empty")
 	require.NotEmpty(t, getNextTaskResponse.Task.Uuid, "uuid should not be empty")
-	require.Equal(t, getNextTaskRequest.CurrentState + workingTaskSuffix, getNextTaskResponse.Task.CurrentState, "Task CurrentState is not the auto target state from before retrieval")
+	require.Equal(t, getNextTaskRequest.CurrentState+workingTaskSuffix, getNextTaskResponse.Task.CurrentState, "Task CurrentState is not the auto target state from before retrieval")
 	require.Equal(t, getNextTaskRequest.CurrentState, getNextTaskResponse.Task.AutoTargetState, "Task AutoTargetState is not swapped with current state before retrieval")
 
 	updateTaskRequest := &corndogsv1alpha1.UpdateTaskRequest{
 		Uuid:            getNextTaskResponse.Task.Uuid,
-		Queue:           "testQueue"+testID,
-		CurrentState:    "testSubmitted"+workingTaskSuffix,
+		Queue:           "testQueue" + testID,
+		CurrentState:    "testSubmitted" + workingTaskSuffix,
 		AutoTargetState: "testSubmitted-completing",
 		NewState:        "testSubmitted-updated", // This is not used in automated flow, we're adding a new flow
 	}
@@ -89,8 +90,8 @@ func TestBasicFlow(t *testing.T) {
 
 	// Now get the updated task
 	getNextTaskRequest = &corndogsv1alpha1.GetNextTaskRequest{
-		Queue:           "testQueue"+testID,
-		CurrentState:    "testSubmitted-updated",
+		Queue:        "testQueue" + testID,
+		CurrentState: "testSubmitted-updated",
 	}
 	getNextTaskResponse, err = corndogsClient.GetNextTask(context.Background(), getNextTaskRequest)
 	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
@@ -104,8 +105,8 @@ func TestBasicFlow(t *testing.T) {
 
 	completeTaskRequest := &corndogsv1alpha1.CompleteTaskRequest{
 		Uuid:         getNextTaskResponse.Task.Uuid,
-		Queue:        "testQueue"+testID,
-		CurrentState: "testSubmitted-updated"+workingTaskSuffix,
+		Queue:        "testQueue" + testID,
+		CurrentState: "testSubmitted-updated" + workingTaskSuffix,
 	}
 	completeTaskResponse, err := corndogsClient.CompleteTask(context.Background(), completeTaskRequest)
 	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))

@@ -3,6 +3,7 @@ module github.com/TnLCommunity/corndogs
 go 1.17
 
 require (
+	github.com/TnLCommunity/protos-corndogs v1.0.1
 	github.com/brianvoe/gofakeit/v6 v6.11.0
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
