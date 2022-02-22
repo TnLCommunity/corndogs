@@ -2,8 +2,9 @@ package implementations
 
 import (
 	"context"
-	corndogsv1alpha1 "github.com/TnLCommunity/corndogs/gen/proto/go/corndogs/v1alpha1"
+
 	"github.com/TnLCommunity/corndogs/server/store"
+	corndogsv1alpha1 "github.com/TnLCommunity/protos-corndogs/gen/proto/go/corndogs/v1alpha1"
 )
 
 func (s *V1Alpha1Server) MustGetTaskStateByID(ctx context.Context, req *corndogsv1alpha1.GetTaskStateByIDRequest) *corndogsv1alpha1.GetTaskStateByIDResponse {
@@ -15,5 +16,3 @@ func (s *V1Alpha1Server) GetNextTask(ctx context.Context, req *corndogsv1alpha1.
 	response, nil := store.AppStore.GetNextTask(req)
 	return response, nil
 }
-
-
