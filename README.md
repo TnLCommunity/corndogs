@@ -22,7 +22,7 @@ This will deploy everything to your local Kubernetes in that namespace.
 
 This will change to be a single bash script in the root, but will use the same tools as a workflow. Other workflows are valid, but you're on your own.
 
-If you want to contribute, just PR into the `main` branch with a branch name of `[major|minor|patch]-feature` and describe the changes. You should only use patch unless you create an Issue and chat first about what you want to do that's a minor bump so we know this is going to fit with our intentions.
+If you want to contribute, just PR into the `main` branch with a branch name following [Conventional Commits](https://www.conventionalcommits.org/) and describe the changes. You should only use `fix:` unless you create an Issue and chat first about what you want to do that's a minor bump so we know this is going to fit with our intentions.
 
 PRs that don't match that branch schema will be rejected, maybe with a reminder. This is because CI/CD won't even run the tests when we've got CI/CD setup.
 
