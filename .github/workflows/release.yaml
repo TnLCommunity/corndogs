@@ -9,8 +9,8 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
-    name: Release
+    name: Release and update helm chart
     steps:
-      - uses: tnlcommunity/action-release-general@v1
+      - uses: tnlcommunity/action-release-update-chart@v1
         with:
           token: ${{ secrets.GIT_RUNNER_TOKEN }}
