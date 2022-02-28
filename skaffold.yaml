@@ -27,4 +27,4 @@ deploy:
       imageStrategy:
         helm: {}
       valuesFiles:
-        - chart/values-skaffold-local.yaml
+        - values-skaffold-local.yaml
