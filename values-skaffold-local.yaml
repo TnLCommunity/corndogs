@@ -1,0 +1,22 @@
+
+appconfig:
+  loglevel: "error"
+  prometheusEnabled: false
+
+database:
+  dbname: "localcorndogsdev"
+  host: "corndogs-postgresql"
+  user: "postgres"
+  password: "localcorndogsdevpass"
+  maxIdleConns: "10"
+  maxOpenConns: "10"
+  connMaxLifetimeSeconds: "3600"
+  tls:
+    enabled: false
+
+postgresql:
+  enabled: true
+  postgresqlDatabase: "localcorndogsdev"
+  postgresqlPassword: "localcorndogsdevpass"
+  tls:
+    enabled: false
