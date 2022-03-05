@@ -23,31 +23,22 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - validate-pr-title
+    env:
+      GIT_PAT: ${{ github.token }}
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.17
-    - name: Install Kind
-      run: |
-        GO111MODULE=on go get sigs.k8s.io/kind
-    - name: Install helm
-      uses: azure/setup-helm@v1
-      with:
-        version: v3.7.1
-    - name: Add corndogs helm chart
-      run: |
-        helm repo add tnlcommunity https://tnlcommunity.github.io/charts
-    - name: Create Kind cluster
-      run: |
-        PATH=$(go env GOPATH)/bin:$PATH kind create cluster
-    - name: Run skaffold
-      uses: hiberbee/github-action-skaffold@1.12.0
-      with:
-        skaffold-version: 1.34.0
-        command: run
-    - name: Run tests
-      run: |
-        kubectl -n skaffoldcorndogs port-forward svc/corndogs 5080 &
-        go test -v ./...
+      - name: Dump Context
+        uses: crazy-max/ghaction-dump-context@v1
+      - name: Run Tests
+        uses: catalystsquad/action-kind-test@v1
+        with:
+          token: ${{ github.token }}
+          ref: ${{ github.ref }}
+          wait-for-ports: 5080,5432
+          add-private-helm-repo: "true"
+          helm-repo-name: tnlcommunity
+          helm-repo-url: https://tnlcommunity.github.io/charts
+          helm-repo-username: ${{ github.token }}
+          helm-repo-password: ${{ github.token }}
+          test-command: |
+            kubectl -n skaffoldcorndogs port-forward svc/corndogs 5080 &
+            go test -v ./...
