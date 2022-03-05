@@ -1,3 +1,11 @@
+## [1.0.2](https://github.com/TnLCommunity/corndogs/compare/v1.0.1...v1.0.2) (2022-03-05)
+
+
+### Bug Fixes
+
+* portforward isnt required in test-command and only 5080 is needed in wait-for-ports ([e362515](https://github.com/TnLCommunity/corndogs/commit/e3625156481e5ac5af40c7b3e39642e15d2a17dc))
+* use action-kind-test action to run skaffold and stuff ([a114dc3](https://github.com/TnLCommunity/corndogs/commit/a114dc312aa24b6e24c7c6e3ba71ed3727f8cea7))
+
 ## [1.0.1](https://github.com/TnLCommunity/corndogs/compare/v1.0.0...v1.0.1) (2022-03-05)
 
 
