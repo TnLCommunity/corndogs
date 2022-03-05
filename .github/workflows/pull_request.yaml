@@ -33,12 +33,10 @@ jobs:
         with:
           token: ${{ github.token }}
           ref: ${{ github.ref }}
-          wait-for-ports: 5080,5432
+          wait-for-ports: 5080
           add-private-helm-repo: "true"
           helm-repo-name: tnlcommunity
           helm-repo-url: https://tnlcommunity.github.io/charts
           helm-repo-username: ${{ github.token }}
           helm-repo-password: ${{ github.token }}
-          test-command: |
-            kubectl -n skaffoldcorndogs port-forward svc/corndogs 5080 &
-            go test -v ./...
+          test-command: go test -v ./...
