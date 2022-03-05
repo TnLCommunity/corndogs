@@ -38,7 +38,7 @@ jobs:
         version: v3.7.1
     - name: Add corndogs helm chart
       run: |
-        helm repo add corndogs https://tnlcommunity.github.io/charts
+        helm repo add tnlcommunity https://tnlcommunity.github.io/charts
     - name: Create Kind cluster
       run: |
         PATH=$(go env GOPATH)/bin:$PATH kind create cluster
