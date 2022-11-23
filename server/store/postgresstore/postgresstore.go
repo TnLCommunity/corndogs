@@ -74,6 +74,10 @@ func (s PostgresStore) SubmitTask(req *corndogsv1alpha1.SubmitTaskRequest) (*cor
 	if req.AutoTargetState == "" {
 		req.AutoTargetState = req.CurrentState + DefaultWorkingSuffix
 	}
+
+	// Sudo code for later
+	// if == 0 set default
+	// if < 0 set to 0 in DB.
 	if req.Timeout < 0 {
 		req.Timeout = 0
 	}
@@ -147,7 +151,7 @@ func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*c
 		model := models.Task{}
 		var nextUuid string
 		result := DB.Raw(
-			`UPDATE tasks SET current_state = current_state || '-updating'
+			`UPDATE tasks SET current_state = current_state || ?
 				 WHERE uuid = (
 					 SELECT uuid FROM tasks
 					 WHERE queue = ? AND current_state = ?
@@ -155,6 +159,7 @@ func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*c
 					 FOR UPDATE SKIP LOCKED
 					 LIMIT 1)
 				 RETURNING uuid`,
+			DefaultWorkingSuffix,
 			req.Queue,
 			req.CurrentState,
 		)
