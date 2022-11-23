@@ -1,3 +1,11 @@
+## [1.0.3](https://github.com/TnLCommunity/corndogs/compare/v1.0.2...v1.0.3) (2022-11-23)
+
+
+### Bug Fixes
+
+* add todo comments for later ([6cf5c4e](https://github.com/TnLCommunity/corndogs/commit/6cf5c4ed6d6377a88dd5a4ca8d9af255d9985184))
+* use DefaultWorkingSuffix in GetNextTask update sql ([0ec4150](https://github.com/TnLCommunity/corndogs/commit/0ec415005636abdba934d6585a01ceefaf29f2e4))
+
 ## [1.0.2](https://github.com/TnLCommunity/corndogs/compare/v1.0.1...v1.0.2) (2022-03-05)
 
 
