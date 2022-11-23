@@ -76,7 +76,7 @@ func (s PostgresStore) SubmitTask(req *corndogsv1alpha1.SubmitTaskRequest) (*cor
 	}
 
 	// Sudo code for later
-	// if == 0 set default
+	// TODO: if == 0 set default
 	// if < 0 set to 0 in DB.
 	if req.Timeout < 0 {
 		req.Timeout = 0
@@ -212,6 +212,8 @@ func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*c
 			} else {
 				model.Timeout = req.Timeout
 			}
+		} else {
+			// TODO: set default
 		}
 		result = DB.Save(model)
 		if result.Error != nil {
