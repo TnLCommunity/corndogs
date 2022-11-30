@@ -1,11 +1,16 @@
 package store
 
-import corndogsv1alpha1 "github.com/TnLCommunity/protos-corndogs/gen/proto/go/corndogs/v1alpha1"
+import (
+	"time"
+
+	corndogsv1alpha1 "github.com/TnLCommunity/protos-corndogs/gen/proto/go/corndogs/v1alpha1"
+)
 
 var AppStore Store
 
 type Store interface {
 	Initialize() (deferredFunc func(), err error)
+	CleanUpTimedOut(atTime time.Time) error
 
 	SubmitTask(req *corndogsv1alpha1.SubmitTaskRequest) (*corndogsv1alpha1.SubmitTaskResponse, error)
 	MustGetTaskStateByID(req *corndogsv1alpha1.GetTaskStateByIDRequest) *corndogsv1alpha1.GetTaskStateByIDResponse

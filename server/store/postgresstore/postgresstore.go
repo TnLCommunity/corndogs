@@ -62,6 +62,10 @@ func (s PostgresStore) Initialize() (func(), error) {
 	return func() { sqlDb.Close() }, nil
 }
 
+func (s PostgresStore) CleanUpTimedOut(atTime time.Time) error {
+	return fmt.Errorf("CleanUpTimedOut is unimplimented!")
+}
+
 func (s PostgresStore) SubmitTask(req *corndogsv1alpha1.SubmitTaskRequest) (*corndogsv1alpha1.SubmitTaskResponse, error) {
 	taskProto := &corndogsv1alpha1.Task{}
 	newUuid, _ := uuid.NewRandom()
