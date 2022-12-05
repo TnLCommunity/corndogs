@@ -21,3 +21,8 @@ func (s *V1Alpha1Server) CancelTask(ctx context.Context, req *corndogsv1alpha1.C
 	response, nil := store.AppStore.CancelTask(req)
 	return response, nil
 }
+
+func (s *V1Alpha1Server) CleanUpTimedOut(ctx context.Context, req *corndogsv1alpha1.CleanUpTimedOutRequest) (*corndogsv1alpha1.CleanUpTimedOutResponse, error) {
+	response, nil := store.AppStore.CleanUpTimedOut(req)
+	return nil, nil
+}
