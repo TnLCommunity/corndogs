@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/TnLCommunity/corndogs/server/subprocesses"
 	corndogsv1alpha1 "github.com/TnLCommunity/protos-corndogs/gen/proto/go/corndogs/v1alpha1"
 	"github.com/stretchr/testify/require"
 )
@@ -60,8 +59,12 @@ func TestBasicTimeout(t *testing.T) {
 	require.Equal(t, getNextTaskRequest.CurrentState, getNextTaskResponse.Task.AutoTargetState, "Task AutoTargetState is not swapped with current state before retrieval")
 
 	timeWhenTimedout := time.Now().Add(timeoutDuration)
-	err = subprocesses.CleanUpTimedOut(timeWhenTimedout)
+	cleanUpTimedOutRequest := &corndogsv1alpha1.CleanUpTimedOutRequest{
+		AtTime: timeWhenTimedout.UnixNano(),
+	}
+	cleanUpTimedOutResponse, err := corndogsClient.CleanUpTimedOut(context.Background(), cleanUpTimedOutRequest)
 	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+	require.Equal(t, cleanUpTimedOutResponse.TimedOut, 1)
 
 	// If everything is working this should be the same, meaning things like the state are returned to their previous values.
 	getNextTaskResponse, err = corndogsClient.GetNextTask(context.Background(), getNextTaskRequest)
