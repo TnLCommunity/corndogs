@@ -62,10 +62,6 @@ func (s PostgresStore) Initialize() (func(), error) {
 	return func() { sqlDb.Close() }, nil
 }
 
-func (s PostgresStore) CleanUpTimedOut(atTime time.Time) error {
-	return fmt.Errorf("CleanUpTimedOut is unimplimented!")
-}
-
 func (s PostgresStore) SubmitTask(req *corndogsv1alpha1.SubmitTaskRequest) (*corndogsv1alpha1.SubmitTaskResponse, error) {
 	taskProto := &corndogsv1alpha1.Task{}
 	newUuid, _ := uuid.NewRandom()
@@ -376,4 +372,31 @@ func (s PostgresStore) CancelTask(req *corndogsv1alpha1.CancelTaskRequest) (*cor
 		panic(err)
 	}
 	return &corndogsv1alpha1.CancelTaskResponse{Task: taskProto}, err
+}
+
+func (s PostgresStore) CleanUpTimedOut(req *corndogsv1alpha1.CleanUpTimedOutRequest) (*corndogsv1alpha1.CleanUpTimedOutResponse, error) {
+	var count int64 = 0
+	err := DB.Transaction(func(tx *gorm.DB) error {
+		model := models.Task{}
+		result := DB.Model(model).Where("(update_time + (timeout * ?)) < ?", time.Second.Nanoseconds(), req.AtTime).Updates(
+			map[string]interface{}{
+				"current_state":     gorm.Expr("auto_target_state"),
+				"auto_target_state": gorm.Expr("current_state"),
+			})
+		if result.Error != nil {
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				return nil
+			} else {
+				log.Err(result.Error)
+				return result.Error
+			}
+		}
+		count = result.RowsAffected
+		return nil
+	})
+	if err != nil {
+		log.Err(err)
+		panic(err)
+	}
+	return &corndogsv1alpha1.CleanUpTimedOutResponse{TimedOut: count}, err
 }
