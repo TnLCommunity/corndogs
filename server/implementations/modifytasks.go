@@ -3,11 +3,21 @@ package implementations
 import (
 	"context"
 
+	"github.com/TnLCommunity/corndogs/server/config"
 	"github.com/TnLCommunity/corndogs/server/store"
 	corndogsv1alpha1 "github.com/TnLCommunity/protos-corndogs/gen/proto/go/corndogs/v1alpha1"
 )
 
 func (s *V1Alpha1Server) UpdateTask(ctx context.Context, req *corndogsv1alpha1.UpdateTaskRequest) (*corndogsv1alpha1.UpdateTaskResponse, error) {
+	if req.CurrentState == "" {
+		req.CurrentState = config.DefaultStartingState
+	}
+	if req.NewState == "" {
+		req.NewState = "updated"
+	}
+	if req.AutoTargetState == "" {
+		req.AutoTargetState = req.NewState + config.DefaultWorkingSuffix
+	}
 	response, nil := store.AppStore.UpdateTask(req)
 	return response, nil
 }

@@ -212,15 +212,6 @@ func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*c
 
 func (s PostgresStore) UpdateTask(req *corndogsv1alpha1.UpdateTaskRequest) (*corndogsv1alpha1.UpdateTaskResponse, error) {
 	taskProto := &corndogsv1alpha1.Task{}
-	if req.CurrentState == "" {
-		req.CurrentState = config.DefaultStartingState
-	}
-	if req.NewState == "" {
-		req.NewState = "updated"
-	}
-	if req.AutoTargetState == "" {
-		req.AutoTargetState = req.NewState + config.DefaultWorkingSuffix
-	}
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{
 			UUID:         req.Uuid,
