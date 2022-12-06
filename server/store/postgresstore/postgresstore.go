@@ -125,12 +125,6 @@ func (s PostgresStore) MustGetTaskStateByID(req *corndogsv1alpha1.GetTaskStateBy
 func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*corndogsv1alpha1.GetNextTaskResponse, error) {
 	// TODO: This may be something that can be simplified, determine that and do so or explain why it can't
 	taskProto := &corndogsv1alpha1.Task{}
-	if req.Queue == "" {
-		req.Queue = config.DefaultQueue
-	}
-	if req.CurrentState == "" {
-		req.CurrentState = config.DefaultStartingState
-	}
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{}
 		var nextUuid string

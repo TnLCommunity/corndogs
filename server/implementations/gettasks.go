@@ -14,7 +14,12 @@ func (s *V1Alpha1Server) MustGetTaskStateByID(ctx context.Context, req *corndogs
 }
 
 func (s *V1Alpha1Server) GetNextTask(ctx context.Context, req *corndogsv1alpha1.GetNextTaskRequest) (*corndogsv1alpha1.GetNextTaskResponse, error) {
-
+	if req.Queue == "" {
+		req.Queue = config.DefaultQueue
+	}
+	if req.CurrentState == "" {
+		req.CurrentState = config.DefaultStartingState
+	}
 	if req.Timeout == 0 {
 		req.Timeout = config.DefaultTimeout
 	}
