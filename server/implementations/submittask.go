@@ -9,6 +9,8 @@ import (
 )
 
 func (s *V1Alpha1Server) SubmitTask(ctx context.Context, req *corndogsv1alpha1.SubmitTaskRequest) (*corndogsv1alpha1.SubmitTaskResponse, error) {
+	// Since protobuf default int values are 0, if they wanted 0, they have to send a negative value
+	// which is otherwise invalid as a timeout
 	if req.Timeout == 0 {
 		req.Timeout = config.DefaultTimeout
 	}
