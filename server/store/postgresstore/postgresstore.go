@@ -337,10 +337,11 @@ func (s PostgresStore) CleanUpTimedOut(req *corndogsv1alpha1.CleanUpTimedOutRequ
 	var count int64 = 0
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{}
-		result := DB.Model(model).Where("(update_time + (timeout * ?)) < ?", time.Second.Nanoseconds(), req.AtTime).Updates(
+		result := DB.Model(model).Where("timeout > 0 AND (update_time + (timeout * ?)) < ?", time.Second.Nanoseconds(), req.AtTime).Updates(
 			map[string]interface{}{
 				"current_state":     gorm.Expr("auto_target_state"),
 				"auto_target_state": gorm.Expr("current_state"),
+				"timeout":           0,
 			})
 		if result.Error != nil {
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
