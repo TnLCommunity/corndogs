@@ -198,17 +198,7 @@ func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*c
 		// swap states so if a timeout occurs we set them back to what they were
 		model.CurrentState = model.AutoTargetState
 		model.AutoTargetState = req.CurrentState
-		if req.Timeout != 0 {
-			// Since protobuf default int values are 0, if they wanted 0, they have to send a negative value
-			// which is otherwise invalid as a timeout
-			if req.Timeout < 0 {
-				model.Timeout = 0
-			} else {
-				model.Timeout = req.Timeout
-			}
-		} else {
-			// TODO: set default
-		}
+		model.Timeout = req.Timeout
 		result = DB.Save(model)
 		if result.Error != nil {
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) || result.RowsAffected == 0 {
