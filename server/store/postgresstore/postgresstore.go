@@ -75,12 +75,6 @@ func (s PostgresStore) SubmitTask(req *corndogsv1alpha1.SubmitTaskRequest) (*cor
 		req.AutoTargetState = req.CurrentState + DefaultWorkingSuffix
 	}
 
-	// Sudo code for later
-	// TODO: if == 0 set default
-	// if < 0 set to 0 in DB.
-	if req.Timeout < 0 {
-		req.Timeout = 0
-	}
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{
 			UUID:            newUuid.String(),
