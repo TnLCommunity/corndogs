@@ -29,7 +29,6 @@ var DatabaseSSLMode = config.GetEnvOrDefault("DATABASE_SSL_MODE", "disable")
 var MaxIdleConns = config.GetEnvAsIntOrDefault("DATABASE_MAX_IDLE_CONNS", "1")
 var MaxOpenConns = config.GetEnvAsIntOrDefault("DATABASE_MAX_OPEN_CONNS", "10")
 var ConnMaxLifetime = time.Duration(config.GetEnvAsIntOrDefault("DATABASE_CONN_MAX_LIFETIME_SECONDS", "3600")) * time.Second
-var DefaultWorkingSuffix = "-working"
 
 // sql files embedded at compile time, used by goose
 //go:embed migrations/*.sql
@@ -65,15 +64,6 @@ func (s PostgresStore) Initialize() (func(), error) {
 func (s PostgresStore) SubmitTask(req *corndogsv1alpha1.SubmitTaskRequest) (*corndogsv1alpha1.SubmitTaskResponse, error) {
 	taskProto := &corndogsv1alpha1.Task{}
 	newUuid, _ := uuid.NewRandom()
-	if req.Queue == "" {
-		req.Queue = config.DefaultQueue
-	}
-	if req.CurrentState == "" {
-		req.CurrentState = config.DefaultStartingState
-	}
-	if req.AutoTargetState == "" {
-		req.AutoTargetState = req.CurrentState + DefaultWorkingSuffix
-	}
 
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{
@@ -153,7 +143,7 @@ func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*c
 					 FOR UPDATE SKIP LOCKED
 					 LIMIT 1)
 				 RETURNING uuid`,
-			DefaultWorkingSuffix,
+			config.DefaultWorkingSuffix,
 			req.Queue,
 			req.CurrentState,
 		)
@@ -229,7 +219,7 @@ func (s PostgresStore) UpdateTask(req *corndogsv1alpha1.UpdateTaskRequest) (*cor
 		req.NewState = "updated"
 	}
 	if req.AutoTargetState == "" {
-		req.AutoTargetState = req.NewState + DefaultWorkingSuffix
+		req.AutoTargetState = req.NewState + config.DefaultWorkingSuffix
 	}
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{
