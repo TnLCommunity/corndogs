@@ -20,12 +20,6 @@ func (s *V1Alpha1Server) GetNextTask(ctx context.Context, req *corndogsv1alpha1.
 	if req.CurrentState == "" {
 		req.CurrentState = config.DefaultStartingState
 	}
-	if req.Timeout == 0 {
-		req.Timeout = config.DefaultTimeout
-	}
-	if req.Timeout < 0 {
-		req.Timeout = 0
-	}
 	response, nil := store.AppStore.GetNextTask(req)
 	return response, nil
 }
