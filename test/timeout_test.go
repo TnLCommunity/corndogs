@@ -58,12 +58,12 @@ func TestBasicTimeout(t *testing.T) {
 	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
 	require.Equal(t, int64(1), cleanUpTimedOutResponse.TimedOut)
 
-	// If everything is working this should be the same, meaning things like the state are returned to their previous values.
+	// If everything is working things like state should be the same except Timeout should now be 0
 	getNextTaskResponse, err = corndogsClient.GetNextTask(context.Background(), getNextTaskRequest)
 	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
 	require.NotNil(t, getNextTaskResponse.Task, "Task in response was nil")
 	require.Equal(t, getNextTaskRequest.Queue, getNextTaskResponse.Task.Queue, "Queue name is not equal")
-	require.Equal(t, timeout, getNextTaskResponse.Task.Timeout, "Timeout is not equal")
+	require.Equal(t, int64(0), getNextTaskResponse.Task.Timeout, "Timeout should now be 0")
 	require.NotEmpty(t, getNextTaskResponse.Task.SubmitTime, "submit_time should not be empty")
 	require.NotEmpty(t, getNextTaskResponse.Task.UpdateTime, "update_time should not be empty")
 	require.NotEmpty(t, getNextTaskResponse.Task.Uuid, "uuid should not be empty")
@@ -111,13 +111,6 @@ func TestBasicTimeout(t *testing.T) {
 // }
 
 func TestNoTimeout(t *testing.T) {
-	// TEST 3
-	// send with timeout -1
-	// check timeout is 0 in DB?
-	// cleanup timed out
-	// Check it did not timeout
-	// Check CurrentState is the same as the working state
-
 	corndogsClient := GetCorndogsClient()
 	rand.Seed(time.Now().UnixNano())
 	workingTaskSuffix := "-working"
@@ -136,7 +129,7 @@ func TestNoTimeout(t *testing.T) {
 	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
 	require.NotNil(t, submitTaskResponse.Task, "Task in response was nil")
 	require.Equal(t, submitTaskRequest.Queue, submitTaskResponse.Task.Queue, "Queue name is not equal")
-	require.Equal(t, timeout, submitTaskResponse.Task.Timeout, "Timeout is not equal")
+	require.Equal(t, int64(0), submitTaskResponse.Task.Timeout, "Timeout should be 0")
 	require.NotEmpty(t, submitTaskResponse.Task.SubmitTime, "submit_time should not be empty")
 	require.NotEmpty(t, submitTaskResponse.Task.UpdateTime, "update_time should not be empty")
 	require.NotEmpty(t, submitTaskResponse.Task.Uuid, "uuid should not be empty")
@@ -149,13 +142,23 @@ func TestNoTimeout(t *testing.T) {
 	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
 	require.NotNil(t, getNextTaskResponse.Task, "Task in response was nil")
 	require.Equal(t, getNextTaskRequest.Queue, getNextTaskResponse.Task.Queue, "Queue name is not equal")
-	require.Equal(t, 0, getNextTaskResponse.Task.Timeout, "Timeout should be zero meaning no timeout")
+	require.Equal(t, int64(0), getNextTaskResponse.Task.Timeout, "Timeout should be zero meaning no timeout")
 	require.NotEmpty(t, getNextTaskResponse.Task.SubmitTime, "submit_time should not be empty")
 	require.NotEmpty(t, getNextTaskResponse.Task.UpdateTime, "update_time should not be empty")
 	require.NotEmpty(t, getNextTaskResponse.Task.Uuid, "uuid should not be empty")
 	require.Equal(t, getNextTaskRequest.CurrentState+workingTaskSuffix, getNextTaskResponse.Task.CurrentState, "Task CurrentState is not the auto target state from before retrieval")
 	require.Equal(t, getNextTaskRequest.CurrentState, getNextTaskResponse.Task.AutoTargetState, "Task AutoTargetState is not swapped with current state before retrieval")
 
-	// Clean up timed out
-	// Double check task wasnt timed out by requesting another task. It should return no task.
+	timeoutDuration := time.Duration(5) * time.Second
+	timeWhenTimedout := time.Now().UTC().Add(timeoutDuration).UnixNano()
+	cleanUpTimedOutRequest := &corndogsv1alpha1.CleanUpTimedOutRequest{
+		AtTime: timeWhenTimedout,
+	}
+	cleanUpTimedOutResponse, err := corndogsClient.CleanUpTimedOut(context.Background(), cleanUpTimedOutRequest)
+	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+	require.Equal(t, int64(0), cleanUpTimedOutResponse.TimedOut)
+
+	getNextTaskResponse, err = corndogsClient.GetNextTask(context.Background(), getNextTaskRequest)
+	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+	require.Nil(t, getNextTaskResponse.Task, "Task was not nil.")
 }
