@@ -254,3 +254,49 @@ func TestGetNextTaskOverrideNoTimeout(t *testing.T) {
 	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
 	require.Equal(t, int64(0), cleanUpTimedOutResponse.TimedOut)
 }
+
+func TestGetNextTaskOverrideTimeoutNotSet(t *testing.T) {
+	corndogsClient := GetCorndogsClient()
+	rand.Seed(time.Now().UnixNano())
+	workingTaskSuffix := "-working"
+	testPayload := []byte("testPayload" + testID)
+	var timeout int64 = 5
+
+	submitTaskRequest := &corndogsv1alpha1.SubmitTaskRequest{
+		Queue:           "testQueue" + testID,
+		CurrentState:    "testSubmitted",
+		AutoTargetState: "testSubmitted" + workingTaskSuffix,
+		Timeout:         timeout,
+		Payload:         testPayload,
+	}
+	submitTaskResponse, err := corndogsClient.SubmitTask(context.Background(), submitTaskRequest)
+	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+	require.NotNil(t, submitTaskResponse.Task, "Task in response was nil")
+	require.Equal(t, submitTaskRequest.Queue, submitTaskResponse.Task.Queue, "Queue name is not equal")
+	require.NotEmpty(t, submitTaskResponse.Task.SubmitTime, "submit_time should not be empty")
+	require.NotEmpty(t, submitTaskResponse.Task.UpdateTime, "update_time should not be empty")
+	require.NotEmpty(t, submitTaskResponse.Task.Uuid, "uuid should not be empty")
+
+	getNextTaskRequest := &corndogsv1alpha1.GetNextTaskRequest{
+		Queue:        "testQueue" + testID,
+		CurrentState: "testSubmitted",
+	}
+	getNextTaskResponse, err := corndogsClient.GetNextTask(context.Background(), getNextTaskRequest)
+	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+	require.NotNil(t, getNextTaskResponse.Task, "Task in response was nil")
+	require.Equal(t, getNextTaskRequest.Queue, getNextTaskResponse.Task.Queue, "Queue name is not equal")
+	require.NotEmpty(t, getNextTaskResponse.Task.SubmitTime, "submit_time should not be empty")
+	require.NotEmpty(t, getNextTaskResponse.Task.UpdateTime, "update_time should not be empty")
+	require.NotEmpty(t, getNextTaskResponse.Task.Uuid, "uuid should not be empty")
+	require.NotEqual(t, int64(0), getNextTaskResponse.Task.Timeout, "Task Timeout was wrongly overriden")
+	require.Equal(t, timeout, getNextTaskResponse.Task.Timeout, "Task Timeout is not equal")
+
+	timeoutDuration := time.Duration(timeout) * time.Second
+	timeWhenTimedout := time.Now().UTC().Add(timeoutDuration).UnixNano()
+	cleanUpTimedOutRequest := &corndogsv1alpha1.CleanUpTimedOutRequest{
+		AtTime: timeWhenTimedout,
+	}
+	cleanUpTimedOutResponse, err := corndogsClient.CleanUpTimedOut(context.Background(), cleanUpTimedOutRequest)
+	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+	require.Equal(t, int64(1), cleanUpTimedOutResponse.TimedOut)
+}
