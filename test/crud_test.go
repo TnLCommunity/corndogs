@@ -119,6 +119,44 @@ func TestBasicFlow(t *testing.T) {
 	require.Equal(t, []byte(nil), completeTaskResponse.Task.Payload, "Task Payload is not nil after completion")
 }
 
+func TestGetNextTaskOverrideState(t *testing.T) {
+	corndogsClient := GetCorndogsClient()
+	rand.Seed(time.Now().UnixNano())
+	workingTaskSuffix := "-working"
+	testPayload := []byte("testPayload" + testID)
+
+	submitTaskRequest := &corndogsv1alpha1.SubmitTaskRequest{
+		Queue:           "testQueue" + testID,
+		CurrentState:    "testSubmitted",
+		AutoTargetState: "testSubmitted" + workingTaskSuffix,
+		Timeout:         -1, // No timeout
+		Payload:         testPayload,
+	}
+	submitTaskResponse, err := corndogsClient.SubmitTask(context.Background(), submitTaskRequest)
+	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+	require.NotNil(t, submitTaskResponse.Task, "Task in response was nil")
+	require.Equal(t, submitTaskRequest.Queue, submitTaskResponse.Task.Queue, "Queue name is not equal")
+	require.NotEmpty(t, submitTaskResponse.Task.SubmitTime, "submit_time should not be empty")
+	require.NotEmpty(t, submitTaskResponse.Task.UpdateTime, "update_time should not be empty")
+	require.NotEmpty(t, submitTaskResponse.Task.Uuid, "uuid should not be empty")
+
+	getNextTaskRequest := &corndogsv1alpha1.GetNextTaskRequest{
+		Queue:                   "testQueue" + testID,
+		CurrentState:            "testSubmitted",
+		OverrideCurrentState:    "testOverriddenCurrentState",
+		OverrideAutoTargetState: "testOverriddenAutoTargetState",
+	}
+	getNextTaskResponse, err := corndogsClient.GetNextTask(context.Background(), getNextTaskRequest)
+	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+	require.NotNil(t, getNextTaskResponse.Task, "Task in response was nil")
+	require.Equal(t, getNextTaskRequest.Queue, getNextTaskResponse.Task.Queue, "Queue name is not equal")
+	require.NotEmpty(t, getNextTaskResponse.Task.SubmitTime, "submit_time should not be empty")
+	require.NotEmpty(t, getNextTaskResponse.Task.UpdateTime, "update_time should not be empty")
+	require.NotEmpty(t, getNextTaskResponse.Task.Uuid, "uuid should not be empty")
+	require.Equal(t, getNextTaskRequest.OverrideCurrentState, getNextTaskResponse.Task.CurrentState, "Task CurrentState is not the overridden")
+	require.Equal(t, getNextTaskRequest.OverrideAutoTargetState, getNextTaskResponse.Task.AutoTargetState, "Task AutoTargetState is not overridden")
+}
+
 func GetCorndogsClient() corndogsv1alpha1.CorndogsServiceClient {
 	// connect
 	connectTo := "127.0.0.1:5080"
