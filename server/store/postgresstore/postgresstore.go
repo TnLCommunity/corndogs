@@ -182,7 +182,19 @@ func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*c
 		// swap states so if a timeout occurs we set them back to what they were
 		model.CurrentState = model.AutoTargetState
 		model.AutoTargetState = req.CurrentState
-		model.Timeout = req.Timeout
+
+		if req.OverrideCurrentState != "" {
+			model.CurrentState = req.OverrideCurrentState
+		}
+		if req.OverrideAutoTargetState != "" {
+			model.AutoTargetState = req.OverrideAutoTargetState
+		}
+		if req.OverrideTimeout < 0 {
+			model.Timeout = 0
+		} else if req.OverrideTimeout != 0 {
+			model.Timeout = req.OverrideTimeout
+		}
+
 		result = DB.Save(model)
 		if result.Error != nil {
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) || result.RowsAffected == 0 {
