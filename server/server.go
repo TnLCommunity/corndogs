@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-func main() {
+func SetupAndRun() {
 	// get logging setup
 	logging.InitLogging()
 	// use the postgres store
