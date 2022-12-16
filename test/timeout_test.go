@@ -16,11 +16,12 @@ func TestBasicTimeout(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
 	workingTaskSuffix := "-working"
 	testPayload := []byte("testPayload" + testID)
+	testQueue := "testQueue" + testID
 	var timeout int64 = 5
 	timeoutDuration := time.Duration(timeout) * time.Second
 
 	submitTaskRequest := &corndogsv1alpha1.SubmitTaskRequest{
-		Queue:           "testQueue" + testID,
+		Queue:           testQueue,
 		CurrentState:    "testSubmitted",
 		AutoTargetState: "testSubmitted" + workingTaskSuffix,
 		Timeout:         timeout,
@@ -36,7 +37,7 @@ func TestBasicTimeout(t *testing.T) {
 	require.NotEmpty(t, submitTaskResponse.Task.Uuid, "uuid should not be empty")
 
 	getNextTaskRequest := &corndogsv1alpha1.GetNextTaskRequest{
-		Queue:        "testQueue" + testID,
+		Queue:        testQueue,
 		CurrentState: "testSubmitted",
 	}
 	getNextTaskResponse, err := corndogsClient.GetNextTask(context.Background(), getNextTaskRequest)
@@ -53,6 +54,7 @@ func TestBasicTimeout(t *testing.T) {
 	timeWhenTimedout := time.Now().UTC().Add(timeoutDuration).UnixNano()
 	cleanUpTimedOutRequest := &corndogsv1alpha1.CleanUpTimedOutRequest{
 		AtTime: timeWhenTimedout,
+		Queue:  testQueue,
 	}
 	cleanUpTimedOutResponse, err := corndogsClient.CleanUpTimedOut(context.Background(), cleanUpTimedOutRequest)
 	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
@@ -76,10 +78,11 @@ func TestBasicTimeout(t *testing.T) {
 // 	rand.Seed(time.Now().UnixNano())
 // 	workingTaskSuffix := "-working"
 // 	testPayload := []byte("testPayload" + testID)
+//  testQueue := "testQueue" + testID
 // 	var timeout int64 = 0
 
 // 	submitTaskRequest := &corndogsv1alpha1.SubmitTaskRequest{
-// 		Queue:           "testQueue" + testID,
+// 		Queue: testQueue,
 // 		CurrentState:    "testSubmitted",
 // 		AutoTargetState: "testSubmitted" + workingTaskSuffix,
 // 		Timeout:         timeout,
@@ -95,7 +98,7 @@ func TestBasicTimeout(t *testing.T) {
 // 	require.NotEmpty(t, submitTaskResponse.Task.Uuid, "uuid should not be empty")
 
 // 	getNextTaskRequest := &corndogsv1alpha1.GetNextTaskRequest{
-// 		Queue:        "testQueue" + testID,
+// 		Queue: testQueue,
 // 		CurrentState: "testSubmitted",
 // 	}
 // 	getNextTaskResponse, err := corndogsClient.GetNextTask(context.Background(), getNextTaskRequest)
@@ -115,10 +118,11 @@ func TestNoTimeout(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
 	workingTaskSuffix := "-working"
 	testPayload := []byte("testPayload" + testID)
+	testQueue := "testQueue" + testID
 	var timeout int64 = -1
 
 	submitTaskRequest := &corndogsv1alpha1.SubmitTaskRequest{
-		Queue:           "testQueue" + testID,
+		Queue:           testQueue,
 		CurrentState:    "testSubmitted",
 		AutoTargetState: "testSubmitted" + workingTaskSuffix,
 		Timeout:         timeout,
@@ -135,7 +139,7 @@ func TestNoTimeout(t *testing.T) {
 	require.NotEmpty(t, submitTaskResponse.Task.Uuid, "uuid should not be empty")
 
 	getNextTaskRequest := &corndogsv1alpha1.GetNextTaskRequest{
-		Queue:        "testQueue" + testID,
+		Queue:        testQueue,
 		CurrentState: "testSubmitted",
 	}
 	getNextTaskResponse, err := corndogsClient.GetNextTask(context.Background(), getNextTaskRequest)
@@ -168,10 +172,11 @@ func TestGetNextTaskOverrideTimeout(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
 	workingTaskSuffix := "-working"
 	testPayload := []byte("testPayload" + testID)
+	testQueue := "testQueue" + testID
 	var timeout int64 = 5
 
 	submitTaskRequest := &corndogsv1alpha1.SubmitTaskRequest{
-		Queue:           "testQueue" + testID,
+		Queue:           testQueue,
 		CurrentState:    "testSubmitted",
 		AutoTargetState: "testSubmitted" + workingTaskSuffix,
 		Timeout:         -1, // No timeout
@@ -186,7 +191,7 @@ func TestGetNextTaskOverrideTimeout(t *testing.T) {
 	require.NotEmpty(t, submitTaskResponse.Task.Uuid, "uuid should not be empty")
 
 	getNextTaskRequest := &corndogsv1alpha1.GetNextTaskRequest{
-		Queue:           "testQueue" + testID,
+		Queue:           testQueue,
 		CurrentState:    "testSubmitted",
 		OverrideTimeout: timeout,
 	}
@@ -214,10 +219,11 @@ func TestGetNextTaskOverrideNoTimeout(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
 	workingTaskSuffix := "-working"
 	testPayload := []byte("testPayload" + testID)
+	testQueue := "testQueue" + testID
 	var timeout int64 = 5
 
 	submitTaskRequest := &corndogsv1alpha1.SubmitTaskRequest{
-		Queue:           "testQueue" + testID,
+		Queue:           testQueue,
 		CurrentState:    "testSubmitted",
 		AutoTargetState: "testSubmitted" + workingTaskSuffix,
 		Timeout:         timeout,
@@ -232,7 +238,7 @@ func TestGetNextTaskOverrideNoTimeout(t *testing.T) {
 	require.NotEmpty(t, submitTaskResponse.Task.Uuid, "uuid should not be empty")
 
 	getNextTaskRequest := &corndogsv1alpha1.GetNextTaskRequest{
-		Queue:           "testQueue" + testID,
+		Queue:           testQueue,
 		CurrentState:    "testSubmitted",
 		OverrideTimeout: -1, // No timeout
 	}
@@ -260,10 +266,11 @@ func TestGetNextTaskOverrideTimeoutNotSet(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
 	workingTaskSuffix := "-working"
 	testPayload := []byte("testPayload" + testID)
+	testQueue := "testQueue" + testID
 	var timeout int64 = 5
 
 	submitTaskRequest := &corndogsv1alpha1.SubmitTaskRequest{
-		Queue:           "testQueue" + testID,
+		Queue:           testQueue,
 		CurrentState:    "testSubmitted",
 		AutoTargetState: "testSubmitted" + workingTaskSuffix,
 		Timeout:         timeout,
@@ -278,7 +285,7 @@ func TestGetNextTaskOverrideTimeoutNotSet(t *testing.T) {
 	require.NotEmpty(t, submitTaskResponse.Task.Uuid, "uuid should not be empty")
 
 	getNextTaskRequest := &corndogsv1alpha1.GetNextTaskRequest{
-		Queue:        "testQueue" + testID,
+		Queue:        testQueue,
 		CurrentState: "testSubmitted",
 	}
 	getNextTaskResponse, err := corndogsClient.GetNextTask(context.Background(), getNextTaskRequest)
