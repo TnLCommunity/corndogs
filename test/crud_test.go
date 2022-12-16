@@ -3,7 +3,6 @@ package test
 import (
 	"context"
 	"fmt"
-	"math/rand"
 	"testing"
 	"time"
 
@@ -23,7 +22,7 @@ var testID = gofakeit.Breakfast() + gofakeit.Dessert()
 func init() {
 	// Get the next task in the test_via_core_corndogs_repo queue, which should be none
 	getNextRequest := &corndogsv1alpha1.GetNextTaskRequest{
-		Queue:        "testQueue" + testID,
+		Queue:        "testQueue" + GetTestID(),
 		CurrentState: "submitted",
 	}
 	nextTaskResponse, err := client.GetNextTask(context.Background(), getNextRequest)
@@ -36,8 +35,8 @@ func init() {
 }
 
 func TestBasicFlow(t *testing.T) {
+	testID := GetTestID()
 	corndogsClient := GetCorndogsClient()
-	rand.Seed(time.Now().UnixNano())
 	workingTaskSuffix := "-working"
 	testPayload := []byte("testPayload" + testID)
 
@@ -120,8 +119,8 @@ func TestBasicFlow(t *testing.T) {
 }
 
 func TestGetNextTaskOverrideState(t *testing.T) {
+	testID := GetTestID()
 	corndogsClient := GetCorndogsClient()
-	rand.Seed(time.Now().UnixNano())
 	workingTaskSuffix := "-working"
 	testPayload := []byte("testPayload" + testID)
 
@@ -167,4 +166,8 @@ func GetCorndogsClient() corndogsv1alpha1.CorndogsServiceClient {
 	}
 	cancel()
 	return corndogsv1alpha1.NewCorndogsServiceClient(conn)
+}
+
+func GetTestID() string {
+	return gofakeit.Breakfast() + gofakeit.Dessert()
 }

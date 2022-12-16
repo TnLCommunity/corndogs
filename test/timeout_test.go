@@ -3,7 +3,6 @@ package test
 import (
 	"context"
 	"fmt"
-	"math/rand"
 	"testing"
 	"time"
 
@@ -12,8 +11,8 @@ import (
 )
 
 func TestBasicTimeout(t *testing.T) {
+	testID := GetTestID()
 	corndogsClient := GetCorndogsClient()
-	rand.Seed(time.Now().UnixNano())
 	workingTaskSuffix := "-working"
 	testPayload := []byte("testPayload" + testID)
 	testQueue := "testQueue" + testID
@@ -74,8 +73,8 @@ func TestBasicTimeout(t *testing.T) {
 }
 
 func TestNoTimeout(t *testing.T) {
+	testID := GetTestID()
 	corndogsClient := GetCorndogsClient()
-	rand.Seed(time.Now().UnixNano())
 	workingTaskSuffix := "-working"
 	testPayload := []byte("testPayload" + testID)
 	testQueue := "testQueue" + testID
@@ -129,8 +128,8 @@ func TestNoTimeout(t *testing.T) {
 }
 
 func TestGetNextTaskOverrideTimeout(t *testing.T) {
+	testID := GetTestID()
 	corndogsClient := GetCorndogsClient()
-	rand.Seed(time.Now().UnixNano())
 	workingTaskSuffix := "-working"
 	testPayload := []byte("testPayload" + testID)
 	testQueue := "testQueue" + testID
@@ -177,8 +176,8 @@ func TestGetNextTaskOverrideTimeout(t *testing.T) {
 }
 
 func TestGetNextTaskOverrideNoTimeout(t *testing.T) {
+	testID := GetTestID()
 	corndogsClient := GetCorndogsClient()
-	rand.Seed(time.Now().UnixNano())
 	workingTaskSuffix := "-working"
 	testPayload := []byte("testPayload" + testID)
 	testQueue := "testQueue" + testID
@@ -225,8 +224,8 @@ func TestGetNextTaskOverrideNoTimeout(t *testing.T) {
 }
 
 func TestGetNextTaskOverrideTimeoutNotSet(t *testing.T) {
+	testID := GetTestID()
 	corndogsClient := GetCorndogsClient()
-	rand.Seed(time.Now().UnixNano())
 	workingTaskSuffix := "-working"
 	testPayload := []byte("testPayload" + testID)
 	testQueue := "testQueue" + testID
@@ -273,8 +272,8 @@ func TestGetNextTaskOverrideTimeoutNotSet(t *testing.T) {
 }
 
 func TestTimeoutSpecificQueue(t *testing.T) {
+	testID := GetTestID()
 	corndogsClient := GetCorndogsClient()
-	rand.Seed(time.Now().UnixNano())
 	workingTaskSuffix := "-working"
 	testPayload := []byte("testPayload" + testID)
 	testQueue := "testQueue" + testID
@@ -331,8 +330,8 @@ func TestTimeoutSpecificQueue(t *testing.T) {
 }
 
 func TestTimeoutNoQueue(t *testing.T) {
+	testID := GetTestID()
 	corndogsClient := GetCorndogsClient()
-	rand.Seed(time.Now().UnixNano())
 	workingTaskSuffix := "-working"
 	testPayload := []byte("testPayload" + testID)
 	testQueue := "testQueue" + testID
