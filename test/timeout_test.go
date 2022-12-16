@@ -382,5 +382,5 @@ func TestTimeoutNoQueue(t *testing.T) {
 	}
 	cleanUpTimedOutResponse, err := corndogsClient.CleanUpTimedOut(context.Background(), cleanUpTimedOutRequest)
 	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
-	require.GreaterOrEqual(t, int64(2), cleanUpTimedOutResponse.TimedOut, "didnt time out multiple queues")
+	require.GreaterOrEqual(t, cleanUpTimedOutResponse.TimedOut, int64(2), "didnt time out multiple queues")
 }
