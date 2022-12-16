@@ -15,22 +15,24 @@ var timeoutCommand = NewTimeoutCommand()
 func NewTimeoutCommand() *cobra.Command {
 	var address string
 	var port string
+	var queue string
 	timeoutCommand := &cobra.Command{
 		Use:   "timeout",
 		Short: "Send a CleanUpTimedOut request at the current time to a corndogs service",
 		Long:  "Send a CleanUpTimedOut request at the current time to a corndogs service",
 		Run: func(cmd *cobra.Command, args []string) {
-			SendCleanUpTimedOut(address, port)
+			SendCleanUpTimedOut(address, port, queue)
 		},
 	}
 
 	timeoutCommand.Flags().StringVarP(&address, "address", "a", "127.0.0.1", "The address to connect to the corndogs service")
 	timeoutCommand.Flags().StringVarP(&port, "port", "p", "5080", "The port to connect to the corndogs service")
+	timeoutCommand.Flags().StringVarP(&queue, "queue", "q", "", "The queue to limit the timeout to. If left blank the timeout will affect all tasks.")
 	rootCmd.AddCommand(timeoutCommand)
 	return timeoutCommand
 }
 
-func SendCleanUpTimedOut(address, port string) {
+func SendCleanUpTimedOut(address, port, queue string) {
 
 	// connect
 	connectTo := fmt.Sprintf("%s:%s", address, port)
@@ -49,6 +51,7 @@ func SendCleanUpTimedOut(address, port string) {
 	timeToTimeout := nowUTC.UnixNano()
 	cleanUpTimedOutRequest := &corndogsv1alpha1.CleanUpTimedOutRequest{
 		AtTime: timeToTimeout,
+		Queue:  queue,
 	}
 	cleanUpTimedOutResponse, err := corndogsClient.CleanUpTimedOut(context.Background(), cleanUpTimedOutRequest)
 	if err != nil {
