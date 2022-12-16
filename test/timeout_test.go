@@ -329,3 +329,58 @@ func TestTimeoutSpecificQueue(t *testing.T) {
 		require.Equal(t, int64(1), cleanUpTimedOutResponse.TimedOut, "didnt time out specific queue")
 	}
 }
+
+func TestTimeoutNoQueue(t *testing.T) {
+	corndogsClient := GetCorndogsClient()
+	rand.Seed(time.Now().UnixNano())
+	workingTaskSuffix := "-working"
+	testPayload := []byte("testPayload" + testID)
+	testQueue := "testQueue" + testID
+	var timeout int64 = 5
+	queueSuffix := []string{"first", "second"}
+
+	// Create and get a task in each queue
+	for _, suffix := range queueSuffix {
+		submitTaskRequest := &corndogsv1alpha1.SubmitTaskRequest{
+			Queue:           testQueue + suffix,
+			CurrentState:    "testSubmitted",
+			AutoTargetState: "testSubmitted" + workingTaskSuffix,
+			Timeout:         timeout,
+			Payload:         testPayload,
+		}
+
+		submitTaskResponse, err := corndogsClient.SubmitTask(context.Background(), submitTaskRequest)
+		require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+		require.NotNil(t, submitTaskResponse.Task, "Task in response was nil")
+		require.Equal(t, submitTaskRequest.Queue, submitTaskResponse.Task.Queue, "Queue name is not equal")
+		require.Equal(t, timeout, submitTaskResponse.Task.Timeout, "Timeout should be 0")
+		require.NotEmpty(t, submitTaskResponse.Task.SubmitTime, "submit_time should not be empty")
+		require.NotEmpty(t, submitTaskResponse.Task.UpdateTime, "update_time should not be empty")
+		require.NotEmpty(t, submitTaskResponse.Task.Uuid, "uuid should not be empty")
+
+		getNextTaskRequest := &corndogsv1alpha1.GetNextTaskRequest{
+			Queue:        testQueue + suffix,
+			CurrentState: "testSubmitted",
+		}
+		getNextTaskResponse, err := corndogsClient.GetNextTask(context.Background(), getNextTaskRequest)
+		require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+		require.NotNil(t, getNextTaskResponse.Task, "Task in response was nil")
+		require.Equal(t, getNextTaskRequest.Queue, getNextTaskResponse.Task.Queue, "Queue name is not equal")
+		require.Equal(t, timeout, getNextTaskResponse.Task.Timeout, "Timeout should be zero meaning no timeout")
+		require.NotEmpty(t, getNextTaskResponse.Task.SubmitTime, "submit_time should not be empty")
+		require.NotEmpty(t, getNextTaskResponse.Task.UpdateTime, "update_time should not be empty")
+		require.NotEmpty(t, getNextTaskResponse.Task.Uuid, "uuid should not be empty")
+		require.Equal(t, getNextTaskRequest.CurrentState+workingTaskSuffix, getNextTaskResponse.Task.CurrentState, "Task CurrentState is not the auto target state from before retrieval")
+		require.Equal(t, getNextTaskRequest.CurrentState, getNextTaskResponse.Task.AutoTargetState, "Task AutoTargetState is not swapped with current state before retrieval")
+	}
+
+	// Timeout both queues
+	timeoutDuration := time.Duration(timeout) * time.Second
+	timeWhenTimedout := time.Now().UTC().Add(timeoutDuration).UnixNano()
+	cleanUpTimedOutRequest := &corndogsv1alpha1.CleanUpTimedOutRequest{
+		AtTime: timeWhenTimedout,
+	}
+	cleanUpTimedOutResponse, err := corndogsClient.CleanUpTimedOut(context.Background(), cleanUpTimedOutRequest)
+	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+	require.GreaterOrEqual(t, int64(2), cleanUpTimedOutResponse.TimedOut, "didnt time out multiple queues")
+}
