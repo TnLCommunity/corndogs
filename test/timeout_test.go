@@ -117,6 +117,7 @@ func TestNoTimeout(t *testing.T) {
 	timeWhenTimedout := time.Now().UTC().Add(timeoutDuration).UnixNano()
 	cleanUpTimedOutRequest := &corndogsv1alpha1.CleanUpTimedOutRequest{
 		AtTime: timeWhenTimedout,
+		Queue:  testQueue,
 	}
 	cleanUpTimedOutResponse, err := corndogsClient.CleanUpTimedOut(context.Background(), cleanUpTimedOutRequest)
 	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
@@ -168,6 +169,7 @@ func TestGetNextTaskOverrideTimeout(t *testing.T) {
 	timeWhenTimedout := time.Now().UTC().Add(timeoutDuration).UnixNano()
 	cleanUpTimedOutRequest := &corndogsv1alpha1.CleanUpTimedOutRequest{
 		AtTime: timeWhenTimedout,
+		Queue:  testQueue,
 	}
 	cleanUpTimedOutResponse, err := corndogsClient.CleanUpTimedOut(context.Background(), cleanUpTimedOutRequest)
 	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
@@ -215,6 +217,7 @@ func TestGetNextTaskOverrideNoTimeout(t *testing.T) {
 	timeWhenTimedout := time.Now().UTC().Add(timeoutDuration).UnixNano()
 	cleanUpTimedOutRequest := &corndogsv1alpha1.CleanUpTimedOutRequest{
 		AtTime: timeWhenTimedout,
+		Queue:  testQueue,
 	}
 	cleanUpTimedOutResponse, err := corndogsClient.CleanUpTimedOut(context.Background(), cleanUpTimedOutRequest)
 	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
@@ -262,6 +265,7 @@ func TestGetNextTaskOverrideTimeoutNotSet(t *testing.T) {
 	timeWhenTimedout := time.Now().UTC().Add(timeoutDuration).UnixNano()
 	cleanUpTimedOutRequest := &corndogsv1alpha1.CleanUpTimedOutRequest{
 		AtTime: timeWhenTimedout,
+		Queue:  testQueue,
 	}
 	cleanUpTimedOutResponse, err := corndogsClient.CleanUpTimedOut(context.Background(), cleanUpTimedOutRequest)
 	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
