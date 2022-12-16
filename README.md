@@ -31,7 +31,7 @@ PRs that don't match that branch schema will be rejected, maybe with a reminder.
 One can also develop without the full Kubernetes flow by doing the following to get a normal local Go workflow: 
 1. Run the server, run the following from the project root **after** setting environment variables for your database config
 ```
-go run server/main.go
+go run main.go run
 ```
 2. Run the client, each run will make one request
 ```
