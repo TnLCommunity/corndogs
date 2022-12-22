@@ -64,6 +64,20 @@ When workers "complete" a task, they submit it with an optional next task. This 
 
 This allows simple and complicated workflows, alongside workers dedicated to each phase of a workflow. This should also allow highly horizontally scalable workloads using an appropriate datastore.
 
+### Flow Continued
+
+The above is a basic use case. However there are other features available that may not be required by most use cases.
+
+### Timeouts 
+
+When getting a task the auto target state is swapped with the current state, e.g. the current state becomes "submitted-working" by default. When getting a task, you can set also timeout. When a task times out the current and auto target states are swapped back so they can get picked up again.
+
+You may want a task to timeout after being submitted. In this case, as an example, you can submit a task with a timeout and a "dead" state as it's auto target state. When getting a task you can then override the current and auto target states to move the task forward to state "B" with auto target "dead B".
+
+A timeout does *not* happen automatically. You control when your timeout checks happen, using a `CleanUpTimedOutRequest`. It uses `at_time` to compare tasks against to see if they're timed out, and optionaly a `queue` to limit which tasks this affects. This has the added benefit of letting you time out tasks early or late in testing and such.
+
+Corndogs does provide some helper utilities for timeouts. There is a `timeout` command provided in the cli that will send a request at the current time using the address, port, and optional queue flags. There is also a simple cronjob provided by [the corndogs chart](https://github.com/TnLCommunity/chart-corndogs).
+
 ## Supported datastores
 
 Current targets are Postgres and room for others unplanned. The design is such that Corndogs should not know where it's storing things except in the Store implementation, it just gets pointed to a URL and picks up where it needs to. This is Cloud Native.
