@@ -33,7 +33,6 @@ func NewTimeoutCommand() *cobra.Command {
 }
 
 func SendCleanUpTimedOut(address, port, queue string) {
-
 	// connect
 	connectTo := fmt.Sprintf("%s:%s", address, port)
 	fmt.Println("Connecting to:", connectTo)
@@ -47,7 +46,12 @@ func SendCleanUpTimedOut(address, port, queue string) {
 	fmt.Println("Connected")
 
 	nowUTC := time.Now().Add(time.Duration(7) * time.Second).UTC()
-	fmt.Println("Sending at time:", nowUTC)
+
+	if queue != "" {
+		fmt.Printf("Sending for queue '%s' at time: %s\n", queue, nowUTC)
+	} else {
+		fmt.Println("Sending at time:", nowUTC)
+	}
 	timeToTimeout := nowUTC.UnixNano()
 	cleanUpTimedOutRequest := &corndogsv1alpha1.CleanUpTimedOutRequest{
 		AtTime: timeToTimeout,
