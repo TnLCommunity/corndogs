@@ -134,7 +134,7 @@ func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*c
 				 WHERE uuid = (
 					 SELECT uuid FROM tasks
 					 WHERE queue = ? AND current_state = ?
-                     ORDER BY update_time DESC
+                     ORDER BY priority DESC, update_time DESC
 					 FOR UPDATE SKIP LOCKED
 					 LIMIT 1)
 				 RETURNING uuid`,
