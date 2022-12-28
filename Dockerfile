@@ -13,8 +13,10 @@ COPY go.sum .
 # and so that source changes don't invalidate our downloaded layer
 RUN go mod download
 COPY server/ ./server
+COPY cmd/ ./cmd
+COPY main.go ./main.go
 # Build
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o main server/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o main main.go
 
 # Use distroless as minimal base image
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
@@ -25,3 +27,4 @@ COPY --from=builder /bin/grpc_health_probe ./grpc_health_probe
 USER 65532:65532
 
 ENTRYPOINT ["/main"]
+CMD ["run"]

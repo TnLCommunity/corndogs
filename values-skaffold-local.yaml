@@ -3,6 +3,10 @@ appconfig:
   loglevel: "error"
   prometheusEnabled: false
 
+timeoutCron:
+  enabled: false
+  schedule: "*/5 * * * *"
+
 database:
   dbname: "localcorndogsdev"
   host: "corndogs-postgresql"
@@ -16,7 +20,8 @@ database:
 
 postgresql:
   enabled: true
-  postgresqlDatabase: "localcorndogsdev"
-  postgresqlPassword: "localcorndogsdevpass"
+  auth:
+    database: "localcorndogsdev"
+    postgresPassword: "localcorndogsdevpass"
   tls:
     enabled: false

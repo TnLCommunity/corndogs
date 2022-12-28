@@ -29,7 +29,6 @@ var DatabaseSSLMode = config.GetEnvOrDefault("DATABASE_SSL_MODE", "disable")
 var MaxIdleConns = config.GetEnvAsIntOrDefault("DATABASE_MAX_IDLE_CONNS", "1")
 var MaxOpenConns = config.GetEnvAsIntOrDefault("DATABASE_MAX_OPEN_CONNS", "10")
 var ConnMaxLifetime = time.Duration(config.GetEnvAsIntOrDefault("DATABASE_CONN_MAX_LIFETIME_SECONDS", "3600")) * time.Second
-var DefaultWorkingSuffix = "-working"
 
 // sql files embedded at compile time, used by goose
 //go:embed migrations/*.sql
@@ -65,22 +64,7 @@ func (s PostgresStore) Initialize() (func(), error) {
 func (s PostgresStore) SubmitTask(req *corndogsv1alpha1.SubmitTaskRequest) (*corndogsv1alpha1.SubmitTaskResponse, error) {
 	taskProto := &corndogsv1alpha1.Task{}
 	newUuid, _ := uuid.NewRandom()
-	if req.Queue == "" {
-		req.Queue = config.DefaultQueue
-	}
-	if req.CurrentState == "" {
-		req.CurrentState = config.DefaultStartingState
-	}
-	if req.AutoTargetState == "" {
-		req.AutoTargetState = req.CurrentState + DefaultWorkingSuffix
-	}
 
-	// Sudo code for later
-	// TODO: if == 0 set default
-	// if < 0 set to 0 in DB.
-	if req.Timeout < 0 {
-		req.Timeout = 0
-	}
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{
 			UUID:            newUuid.String(),
@@ -141,12 +125,6 @@ func (s PostgresStore) MustGetTaskStateByID(req *corndogsv1alpha1.GetTaskStateBy
 func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*corndogsv1alpha1.GetNextTaskResponse, error) {
 	// TODO: This may be something that can be simplified, determine that and do so or explain why it can't
 	taskProto := &corndogsv1alpha1.Task{}
-	if req.Queue == "" {
-		req.Queue = config.DefaultQueue
-	}
-	if req.CurrentState == "" {
-		req.CurrentState = config.DefaultStartingState
-	}
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{}
 		var nextUuid string
@@ -159,7 +137,7 @@ func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*c
 					 FOR UPDATE SKIP LOCKED
 					 LIMIT 1)
 				 RETURNING uuid`,
-			DefaultWorkingSuffix,
+			config.DefaultWorkingSuffix,
 			req.Queue,
 			req.CurrentState,
 		)
@@ -204,17 +182,19 @@ func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*c
 		// swap states so if a timeout occurs we set them back to what they were
 		model.CurrentState = model.AutoTargetState
 		model.AutoTargetState = req.CurrentState
-		if req.Timeout != 0 {
-			// Since protobuf default int values are 0, if they wanted 0, they have to send a negative value
-			// which is otherwise invalid as a timeout
-			if req.Timeout < 0 {
-				model.Timeout = 0
-			} else {
-				model.Timeout = req.Timeout
-			}
-		} else {
-			// TODO: set default
+
+		if req.OverrideCurrentState != "" {
+			model.CurrentState = req.OverrideCurrentState
 		}
+		if req.OverrideAutoTargetState != "" {
+			model.AutoTargetState = req.OverrideAutoTargetState
+		}
+		if req.OverrideTimeout < 0 {
+			model.Timeout = 0
+		} else if req.OverrideTimeout != 0 {
+			model.Timeout = req.OverrideTimeout
+		}
+
 		result = DB.Save(model)
 		if result.Error != nil {
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) || result.RowsAffected == 0 {
@@ -238,15 +218,6 @@ func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*c
 
 func (s PostgresStore) UpdateTask(req *corndogsv1alpha1.UpdateTaskRequest) (*corndogsv1alpha1.UpdateTaskResponse, error) {
 	taskProto := &corndogsv1alpha1.Task{}
-	if req.CurrentState == "" {
-		req.CurrentState = config.DefaultStartingState
-	}
-	if req.NewState == "" {
-		req.NewState = "updated"
-	}
-	if req.AutoTargetState == "" {
-		req.AutoTargetState = req.NewState + DefaultWorkingSuffix
-	}
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{
 			UUID:         req.Uuid,
@@ -372,4 +343,36 @@ func (s PostgresStore) CancelTask(req *corndogsv1alpha1.CancelTaskRequest) (*cor
 		panic(err)
 	}
 	return &corndogsv1alpha1.CancelTaskResponse{Task: taskProto}, err
+}
+
+func (s PostgresStore) CleanUpTimedOut(req *corndogsv1alpha1.CleanUpTimedOutRequest) (*corndogsv1alpha1.CleanUpTimedOutResponse, error) {
+	var count int64 = 0
+	err := DB.Transaction(func(tx *gorm.DB) error {
+		model := models.Task{}
+		result := DB.Model(model).Where(`
+			timeout > 0 AND
+			(update_time + (timeout * ?)) < ? AND
+			((? = '') OR (? <> '' AND queue = ?))
+		`, time.Second.Nanoseconds(), req.AtTime, req.Queue, req.Queue, req.Queue).Updates(
+			map[string]interface{}{
+				"current_state":     gorm.Expr("auto_target_state"),
+				"auto_target_state": gorm.Expr("current_state"),
+				"timeout":           0,
+			})
+		if result.Error != nil {
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				return nil
+			} else {
+				log.Err(result.Error)
+				return result.Error
+			}
+		}
+		count = result.RowsAffected
+		return nil
+	})
+	if err != nil {
+		log.Err(err)
+		panic(err)
+	}
+	return &corndogsv1alpha1.CleanUpTimedOutResponse{TimedOut: count}, err
 }

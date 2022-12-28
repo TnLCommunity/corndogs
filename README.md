@@ -31,7 +31,7 @@ PRs that don't match that branch schema will be rejected, maybe with a reminder.
 One can also develop without the full Kubernetes flow by doing the following to get a normal local Go workflow: 
 1. Run the server, run the following from the project root **after** setting environment variables for your database config
 ```
-go run server/main.go
+go run main.go run
 ```
 2. Run the client, each run will make one request
 ```
@@ -63,6 +63,20 @@ Workers can pull a new task from a queue and state. State defaults to "submitted
 When workers "complete" a task, they submit it with an optional next task. This means they can submit the next state of the workflow in an atomic way. This optional "next_task" is the same as the submit requirements.
 
 This allows simple and complicated workflows, alongside workers dedicated to each phase of a workflow. This should also allow highly horizontally scalable workloads using an appropriate datastore.
+
+### Flow Continued
+
+The above is a basic use case. However there are other features available that may not be required by most use cases.
+
+### Timeouts 
+
+When getting a task the auto target state is swapped with the current state, e.g. the current state becomes "submitted-working" by default. When getting a task, you can set also timeout. When a task times out the current and auto target states are swapped back so they can get picked up again.
+
+You may want a task to timeout after being submitted. In this case, as an example, you can submit a task with a timeout and a "dead" state as it's auto target state. When getting a task you can then override the current and auto target states to move the task forward to state "B" with auto target "dead B".
+
+A timeout does *not* happen automatically. You control when your timeout checks happen, using a `CleanUpTimedOutRequest`. It uses `at_time` to compare tasks against to see if they're timed out, and optionaly a `queue` to limit which tasks this affects. This has the added benefit of letting you time out tasks early or late in testing and such.
+
+Corndogs does provide some helper utilities for timeouts. There is a `timeout` command provided in the cli that will send a request at the current time using the address, port, and optional queue flags. There is also a simple cronjob provided by [the corndogs chart](https://github.com/TnLCommunity/chart-corndogs).
 
 ## Supported datastores
 
