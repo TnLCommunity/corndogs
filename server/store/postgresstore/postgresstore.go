@@ -72,6 +72,7 @@ func (s PostgresStore) SubmitTask(req *corndogsv1alpha1.SubmitTaskRequest) (*cor
 			CurrentState:    req.CurrentState,
 			AutoTargetState: req.AutoTargetState,
 			Timeout:         req.Timeout,
+			Priority:        req.Priority,
 			Payload:         req.Payload,
 		}
 		result := DB.Create(&model)
