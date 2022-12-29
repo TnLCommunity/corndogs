@@ -80,7 +80,7 @@ Corndogs does provide some helper utilities for timeouts. There is a `timeout` c
 
 ### Priority
 
-A `priority` can be set when submitting a task and when updating a task. You must specify the priority in both or it will default to `0`. You can use a positive value to make sure it is prioritized by a GetNextTask request, or negative to make sure it is deprioritized.
+A `priority` can be set when submitting a task and when updating a task. You must specify the priority in both or it will default to `0`. You can use a positive value to make sure it is prioritized by a GetNextTask request, or negative to make sure it is deprioritized. 
 
 ## Supported datastores
 
