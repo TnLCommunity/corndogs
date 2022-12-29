@@ -239,6 +239,7 @@ func (s PostgresStore) UpdateTask(req *corndogsv1alpha1.UpdateTaskRequest) (*cor
 		model.CurrentState = req.NewState
 		model.AutoTargetState = req.AutoTargetState
 		model.Timeout = req.Timeout
+		model.Priority = req.Priority
 		if len(req.Payload) > 0 {
 			model.Payload = req.Payload
 		}
