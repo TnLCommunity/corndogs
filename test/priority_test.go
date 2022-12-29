@@ -203,3 +203,40 @@ func TestUpdatePriorityDown(t *testing.T) {
 	require.NotEmpty(t, updateTaskResponse.Task.UpdateTime, "update_time should not be empty")
 	require.NotEmpty(t, updateTaskResponse.Task.Uuid, "uuid should not be empty")
 }
+
+func TestUpdatePriorityNotSpecified(t *testing.T) {
+	testID := GetTestID()
+	corndogsClient := GetCorndogsClient()
+	workingTaskSuffix := "-working"
+	testPayload := []byte("testPayload" + testID)
+	testQueue := "testQueue" + testID
+
+	submitTaskRequest := &corndogsv1alpha1.SubmitTaskRequest{
+		Queue:           testQueue,
+		CurrentState:    "testSubmitted",
+		AutoTargetState: "testSubmitted" + workingTaskSuffix,
+		Priority:        1,
+		Payload:         testPayload,
+	}
+	submitTaskResponse, err := corndogsClient.SubmitTask(context.Background(), submitTaskRequest)
+	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+	require.NotNil(t, submitTaskResponse.Task, "Task in response was nil")
+	require.Equal(t, submitTaskRequest.Queue, submitTaskResponse.Task.Queue, "Queue name is not equal")
+	require.Equal(t, int64(1), submitTaskResponse.Task.Priority)
+	require.NotEmpty(t, submitTaskResponse.Task.SubmitTime, "submit_time should not be empty")
+	require.NotEmpty(t, submitTaskResponse.Task.UpdateTime, "update_time should not be empty")
+	require.NotEmpty(t, submitTaskResponse.Task.Uuid, "uuid should not be empty")
+
+	updateTaskRequest := &corndogsv1alpha1.UpdateTaskRequest{
+		Uuid:  submitTaskResponse.Task.Uuid,
+		Queue: "testQueue" + testID,
+	}
+	updateTaskResponse, err := corndogsClient.UpdateTask(context.Background(), updateTaskRequest)
+	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+	require.NotNil(t, updateTaskResponse.Task, "Task in response was nil")
+	require.Equal(t, updateTaskRequest.Queue, updateTaskResponse.Task.Queue, "Queue name is not equal")
+	require.Equal(t, int64(0), updateTaskResponse.Task.Priority, "Priority not updated")
+	require.NotEmpty(t, updateTaskResponse.Task.SubmitTime, "submit_time should not be empty")
+	require.NotEmpty(t, updateTaskResponse.Task.UpdateTime, "update_time should not be empty")
+	require.NotEmpty(t, updateTaskResponse.Task.Uuid, "uuid should not be empty")
+}
