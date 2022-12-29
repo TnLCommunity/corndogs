@@ -18,21 +18,21 @@ func (s *V1Alpha1Server) UpdateTask(ctx context.Context, req *corndogsv1alpha1.U
 	if req.AutoTargetState == "" {
 		req.AutoTargetState = req.NewState + config.DefaultWorkingSuffix
 	}
-	response, nil := store.AppStore.UpdateTask(req)
-	return response, nil
+	response, err := store.AppStore.UpdateTask(req)
+	return response, err
 }
 
 func (s *V1Alpha1Server) CompleteTask(ctx context.Context, req *corndogsv1alpha1.CompleteTaskRequest) (*corndogsv1alpha1.CompleteTaskResponse, error) {
-	response, nil := store.AppStore.CompleteTask(req)
-	return response, nil
+	response, err := store.AppStore.CompleteTask(req)
+	return response, err
 }
 
 func (s *V1Alpha1Server) CancelTask(ctx context.Context, req *corndogsv1alpha1.CancelTaskRequest) (*corndogsv1alpha1.CancelTaskResponse, error) {
-	response, nil := store.AppStore.CancelTask(req)
-	return response, nil
+	response, err := store.AppStore.CancelTask(req)
+	return response, err
 }
 
 func (s *V1Alpha1Server) CleanUpTimedOut(ctx context.Context, req *corndogsv1alpha1.CleanUpTimedOutRequest) (*corndogsv1alpha1.CleanUpTimedOutResponse, error) {
-	response, nil := store.AppStore.CleanUpTimedOut(req)
-	return response, nil
+	response, err := store.AppStore.CleanUpTimedOut(req)
+	return response, err
 }

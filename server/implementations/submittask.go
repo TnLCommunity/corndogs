@@ -27,6 +27,6 @@ func (s *V1Alpha1Server) SubmitTask(ctx context.Context, req *corndogsv1alpha1.S
 	if req.Timeout < 0 {
 		req.Timeout = 0
 	}
-	response, nil := store.AppStore.SubmitTask(req)
-	return response, nil
+	response, err := store.AppStore.SubmitTask(req)
+	return response, err
 }
