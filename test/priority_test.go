@@ -192,7 +192,7 @@ func TestUpdatePriorityDown(t *testing.T) {
 	updateTaskRequest := &corndogsv1alpha1.UpdateTaskRequest{
 		Uuid:     submitTaskResponse.Task.Uuid,
 		Queue:    "testQueue" + testID,
-		Priority: 1,
+		Priority: -1,
 	}
 	updateTaskResponse, err := corndogsClient.UpdateTask(context.Background(), updateTaskRequest)
 	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
