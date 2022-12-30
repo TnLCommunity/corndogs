@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/TnLCommunity/corndogs/server/config"
+	"github.com/TnLCommunity/corndogs/server/metrics"
 	"github.com/TnLCommunity/corndogs/server/store"
 	corndogsv1alpha1 "github.com/TnLCommunity/protos-corndogs/gen/proto/go/corndogs/v1alpha1"
 )
@@ -28,5 +29,8 @@ func (s *V1Alpha1Server) SubmitTask(ctx context.Context, req *corndogsv1alpha1.S
 		req.Timeout = 0
 	}
 	response, err := store.AppStore.SubmitTask(req)
+	if config.PrometheusEnabled && err == nil {
+		metrics.TasksTotal.Inc()
+	}
 	return response, err
 }
