@@ -9,6 +9,11 @@ portForward:
     resourceName: corndogs
     port: 5080
     localPort: 5080
+  # pf for prometheus metrics
+  - resourceType: service
+    resourceName: corndogs
+    port: 8080
+    localPort: 8080
   # pf for postgresdb
   - resourceType: service
     resourceName: corndogs-postgresql
