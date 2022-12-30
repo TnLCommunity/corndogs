@@ -1,3 +1,25 @@
+# [1.2.0](https://github.com/TnLCommunity/corndogs/compare/v1.1.0...v1.2.0) (2022-12-30)
+
+
+### Bug Fixes
+
+* add Priority to postgres implementation ([fd2922f](https://github.com/TnLCommunity/corndogs/commit/fd2922f0f9c3b56ad72056cadf30b8a6c551c137))
+* add test for unspecified priority in update ([3887b5a](https://github.com/TnLCommunity/corndogs/commit/3887b5a60ffd8603c259a381d417de1273230961))
+* add tests for updating priority ([9c1bf21](https://github.com/TnLCommunity/corndogs/commit/9c1bf215cac4b1ae73455384cc7badcaa9a7480b))
+* correct priority values and readability ([c5fc6eb](https://github.com/TnLCommunity/corndogs/commit/c5fc6eb64d7c70282d974b011fa77500cc7254f5))
+* GetNextTask order by priority ([a72657d](https://github.com/TnLCommunity/corndogs/commit/a72657deb8aecef49694e43f176fa1a51e40896b))
+* implement Priority update ([11fae24](https://github.com/TnLCommunity/corndogs/commit/11fae24c1101e9ad4d6bf8becc090d8e5bb31f4c))
+* removing a space from last commit ([64593a8](https://github.com/TnLCommunity/corndogs/commit/64593a8376bf540cebea9dca796e98b7874562f8))
+* testing if the workflow will run from a new commit ([790bae0](https://github.com/TnLCommunity/corndogs/commit/790bae0ad8e7b4dedb76949839c3515db12be663))
+* update protos version for priority fields ([17fa633](https://github.com/TnLCommunity/corndogs/commit/17fa633711b1c647bd91f03458cf8d59988a0d61))
+* update readme to talk about priority ([0713a8c](https://github.com/TnLCommunity/corndogs/commit/0713a8cc4d3569ebb837016a098d0552ddcdfaba))
+* use priority -1 in TestUpdatePriorityDown ([e2c7fc6](https://github.com/TnLCommunity/corndogs/commit/e2c7fc6e844874094320bc1a84cffbe3f52d72fd))
+
+
+### Features
+
+* add basic priority and deprioritize tests ([30d0a67](https://github.com/TnLCommunity/corndogs/commit/30d0a6701bc965fe42aa2e3a051e92e6a6896cd9))
+
 # [1.1.0](https://github.com/TnLCommunity/corndogs/compare/v1.0.3...v1.1.0) (2022-12-28)
 
 
