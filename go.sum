@@ -10,8 +10,8 @@ github.com/Masterminds/semver/v3 v3.1.1/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0
 github.com/Microsoft/go-winio v0.5.0/go.mod h1:JPGBdM1cNvN/6ISo+n8V5iA4v8pBzdOpzfwIujj1a84=
 github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5/go.mod h1:lmUJ/7eu/Q8D7ML55dXQrVaamCz2vxCfdQBasLZfHKk=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
-github.com/TnLCommunity/protos-corndogs v1.1.3 h1:z5K2Lfn/f2CgRi6g6iPLmBBeAI1KAxXkLgSWzUH5q0I=
-github.com/TnLCommunity/protos-corndogs v1.1.3/go.mod h1:eM4NFoTquavJfOI2156jVY1IPPCM23LfmVWNqC3ALaM=
+github.com/TnLCommunity/protos-corndogs v1.2.0 h1:nnxkeqwTcFSbDwgFZt+fvZRsH5XWHGo1f1cuBiqSRC4=
+github.com/TnLCommunity/protos-corndogs v1.2.0/go.mod h1:eM4NFoTquavJfOI2156jVY1IPPCM23LfmVWNqC3ALaM=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=

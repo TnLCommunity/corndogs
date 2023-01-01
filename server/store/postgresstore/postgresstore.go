@@ -72,6 +72,7 @@ func (s PostgresStore) SubmitTask(req *corndogsv1alpha1.SubmitTaskRequest) (*cor
 			CurrentState:    req.CurrentState,
 			AutoTargetState: req.AutoTargetState,
 			Timeout:         req.Timeout,
+			Priority:        req.Priority,
 			Payload:         req.Payload,
 		}
 		result := DB.Create(&model)
@@ -133,7 +134,7 @@ func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*c
 				 WHERE uuid = (
 					 SELECT uuid FROM tasks
 					 WHERE queue = ? AND current_state = ?
-                     ORDER BY update_time DESC
+                     ORDER BY priority DESC, update_time DESC
 					 FOR UPDATE SKIP LOCKED
 					 LIMIT 1)
 				 RETURNING uuid`,
@@ -238,6 +239,7 @@ func (s PostgresStore) UpdateTask(req *corndogsv1alpha1.UpdateTaskRequest) (*cor
 		model.CurrentState = req.NewState
 		model.AutoTargetState = req.AutoTargetState
 		model.Timeout = req.Timeout
+		model.Priority = req.Priority
 		if len(req.Payload) > 0 {
 			model.Payload = req.Payload
 		}
