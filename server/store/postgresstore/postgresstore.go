@@ -378,3 +378,37 @@ func (s PostgresStore) CleanUpTimedOut(req *corndogsv1alpha1.CleanUpTimedOutRequ
 	}
 	return &corndogsv1alpha1.CleanUpTimedOutResponse{TimedOut: count}, err
 }
+
+func (s PostgresStore) GetQueues() (*corndogsv1alpha1.GetQueuesResponse, error) {
+	queues := []string{}
+	var count int64 = 0
+	err := DB.Transaction(func(tx *gorm.DB) error {
+		model := models.Task{}
+		result := DB.Model(model).Select("queue").Distinct().Find(&queues)
+		if result.Error != nil {
+			log.Err(result.Error)
+			return result.Error
+		}
+		result = DB.Model(model).Count(&count)
+		if result.Error != nil {
+			log.Err(result.Error)
+			return result.Error
+		}
+		return nil
+	})
+	if err != nil {
+		log.Err(err)
+		panic(err)
+	}
+	return &corndogsv1alpha1.GetQueuesResponse{Queues: queues, TotalTaskCount: count}, err
+}
+
+func (s PostgresStore) GetQueueTaskCounts() (*corndogsv1alpha1.GetQueueTaskCountsResponse, error) {
+	return &corndogsv1alpha1.GetQueueTaskCountsResponse{}, fmt.Errorf("Not implemented")
+}
+func (s PostgresStore) GetStateCounts(req *corndogsv1alpha1.GetStateCountsRequest) (*corndogsv1alpha1.GetStateCountsResponse, error) {
+	return &corndogsv1alpha1.GetStateCountsResponse{}, fmt.Errorf("Not implemented")
+}
+func (s PostgresStore) GetQueueAndStateCounts() (*corndogsv1alpha1.GetQueueAndStateCountsResponse, error) {
+	return &corndogsv1alpha1.GetQueueAndStateCountsResponse{}, fmt.Errorf("Not implemented")
+}
