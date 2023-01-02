@@ -17,8 +17,8 @@ func (s *V1Alpha1Server) GetQueueTaskCounts(ctx context.Context, req *corndogsv1
 	return response, err
 }
 
-func (s *V1Alpha1Server) GetStateCounts(ctx context.Context, req *corndogsv1alpha1.GetStateCountsRequest) (*corndogsv1alpha1.GetStateCountsResponse, error) {
-	response, err := store.AppStore.GetStateCounts(req)
+func (s *V1Alpha1Server) GetTaskStateCounts(ctx context.Context, req *corndogsv1alpha1.GetTaskStateCountsRequest) (*corndogsv1alpha1.GetTaskStateCountsResponse, error) {
+	response, err := store.AppStore.GetTaskStateCounts(req)
 	return response, err
 }
 
