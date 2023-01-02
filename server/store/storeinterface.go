@@ -16,6 +16,11 @@ type Store interface {
 	CompleteTask(req *corndogsv1alpha1.CompleteTaskRequest) (*corndogsv1alpha1.CompleteTaskResponse, error)
 	CancelTask(req *corndogsv1alpha1.CancelTaskRequest) (*corndogsv1alpha1.CancelTaskResponse, error)
 	CleanUpTimedOut(req *corndogsv1alpha1.CleanUpTimedOutRequest) (*corndogsv1alpha1.CleanUpTimedOutResponse, error)
+	// Metrics
+	GetQueues() (*corndogsv1alpha1.GetQueuesResponse, error)
+	GetQueueTaskCounts() (*corndogsv1alpha1.GetQueueTaskCountsResponse, error)
+	GetStateCounts(req *corndogsv1alpha1.GetStateCountsRequest) (*corndogsv1alpha1.GetStateCountsResponse, error)
+	GetQueueAndStateCounts() (*corndogsv1alpha1.GetQueueAndStateCountsResponse, error)
 }
 
 func SetStore(store Store) {
