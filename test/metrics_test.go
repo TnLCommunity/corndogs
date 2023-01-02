@@ -64,5 +64,5 @@ func TestGetQueueTaskCounts(t *testing.T) {
 	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
 	require.GreaterOrEqual(t, len(getQueueTaskCountsResponse.QueueCounts), 1, "expected at least one queue in queue_counts")
 	require.GreaterOrEqual(t, getQueueTaskCountsResponse.TotalTaskCount, int64(1), "expected a total_task_count value")
-	require.Contains(t, getQueueTaskCountsResponse.QueueCounts[testQueue], int64(1), "test queue should have a value of one in queue_counts")
+	require.Equal(t, getQueueTaskCountsResponse.QueueCounts[testQueue], int64(1), "test queue should have a value of one in queue_counts")
 }
