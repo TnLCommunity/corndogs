@@ -114,3 +114,57 @@ func TestGetTaskStateCounts(t *testing.T) {
 	require.Equal(t, int64(1), getTaskStateCountsResponse.StateCounts[submitTaskRequest.CurrentState], "expected one task for initial state")
 	require.Equal(t, int64(1), getTaskStateCountsResponse.StateCounts[submitTaskRequest.AutoTargetState], "expected one task for auto target state")
 }
+
+func TestGetQueueAndStateCounts(t *testing.T) {
+	testID := GetTestID()
+	corndogsClient := GetCorndogsClient()
+	workingTaskSuffix := "-working"
+	testPayload := []byte("testPayload" + testID)
+	testQueue := "testQueue" + testID
+	queueSuffix := []string{"first", "second"}
+	currentState := "testSubmitted"
+	autoTargetState := currentState + workingTaskSuffix
+
+	// Create and get a task in each queue
+	for _, suffix := range queueSuffix {
+		submitTaskRequest := &corndogsv1alpha1.SubmitTaskRequest{
+			Queue:           testQueue + suffix,
+			CurrentState:    currentState,
+			AutoTargetState: autoTargetState,
+			Timeout:         -1, // No timeout
+			Payload:         testPayload,
+		}
+		submitTaskResponse, err := corndogsClient.SubmitTask(context.Background(), submitTaskRequest)
+		require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+		require.NotNil(t, submitTaskResponse.Task, "Task in response was nil")
+		require.Equal(t, submitTaskRequest.Queue, submitTaskResponse.Task.Queue, "Queue name is not equal")
+		require.NotEmpty(t, submitTaskResponse.Task.SubmitTime, "submit_time should not be empty")
+		require.NotEmpty(t, submitTaskResponse.Task.UpdateTime, "update_time should not be empty")
+		require.NotEmpty(t, submitTaskResponse.Task.Uuid, "uuid should not be empty")
+		// Another one
+		submitTaskResponse, err = corndogsClient.SubmitTask(context.Background(), submitTaskRequest)
+		require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+		require.NotNil(t, submitTaskResponse.Task, "Task in response was nil")
+
+		// Move one to the AutoTargetState
+		getNextTaskRequest := &corndogsv1alpha1.GetNextTaskRequest{
+			Queue:        testQueue,
+			CurrentState: "testSubmitted",
+		}
+		getNextTaskResponse, err := corndogsClient.GetNextTask(context.Background(), getNextTaskRequest)
+		require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+		require.NotNil(t, getNextTaskResponse.Task, "Task in response was nil")
+		require.Equal(t, getNextTaskRequest.Queue, getNextTaskResponse.Task.Queue, "Queue name is not equal")
+	}
+
+	getQueueAndStateCountsResponse, err := corndogsClient.GetQueueAndStateCounts(context.Background(), &corndogsv1alpha1.EmptyRequest{})
+	queueAndStateCounts := getQueueAndStateCountsResponse.QueueAndStateCounts
+	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+
+	for _, suffix := range queueSuffix {
+		require.Equal(t, testQueue, queueAndStateCounts[testQueue+suffix].Queue, "Queue name is not equal")
+		require.Equal(t, int64(2), queueAndStateCounts[testQueue+suffix].Count, "expected two tasks in queue")
+		require.Equal(t, int64(1), queueAndStateCounts[testQueue+suffix].StateCounts[currentState], "expected one task for initial state")
+		require.Equal(t, int64(1), queueAndStateCounts[testQueue+suffix].StateCounts[autoTargetState], "expected one task for auto target state")
+	}
+}
