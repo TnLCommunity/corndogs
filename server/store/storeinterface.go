@@ -19,7 +19,7 @@ type Store interface {
 	// Metrics
 	GetQueues() (*corndogsv1alpha1.GetQueuesResponse, error)
 	GetQueueTaskCounts() (*corndogsv1alpha1.GetQueueTaskCountsResponse, error)
-	GetStateCounts(req *corndogsv1alpha1.GetStateCountsRequest) (*corndogsv1alpha1.GetStateCountsResponse, error)
+	GetTaskStateCounts(req *corndogsv1alpha1.GetTaskStateCountsRequest) (*corndogsv1alpha1.GetTaskStateCountsResponse, error)
 	GetQueueAndStateCounts() (*corndogsv1alpha1.GetQueueAndStateCountsResponse, error)
 }
 
