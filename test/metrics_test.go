@@ -67,7 +67,7 @@ func TestGetQueueTaskCounts(t *testing.T) {
 	require.Equal(t, int64(1), getQueueTaskCountsResponse.QueueCounts[testQueue], "test queue should have a value of one in queue_counts")
 }
 
-func TestGetStateCounts(t *testing.T) {
+func TestGetTaskStateCounts(t *testing.T) {
 	testID := GetTestID()
 	corndogsClient := GetCorndogsClient()
 	workingTaskSuffix := "-working"
