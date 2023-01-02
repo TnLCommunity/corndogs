@@ -404,7 +404,35 @@ func (s PostgresStore) GetQueues() (*corndogsv1alpha1.GetQueuesResponse, error) 
 }
 
 func (s PostgresStore) GetQueueTaskCounts() (*corndogsv1alpha1.GetQueueTaskCountsResponse, error) {
-	return &corndogsv1alpha1.GetQueueTaskCountsResponse{}, fmt.Errorf("Not implemented")
+	queues := make(map[string]int64)
+	var count int64 = 0
+	err := DB.Transaction(func(tx *gorm.DB) error {
+		model := models.Task{}
+		rows, err := DB.Model(model).Select("queue", "COUNT(queue)").Group("queue").Rows()
+		defer rows.Close()
+		if err != nil {
+			log.Err(err)
+			return err
+		}
+		for rows.Next() {
+			var key string
+			var value int64
+			rows.Scan(&key, &value)
+			queues[key] = value
+		}
+
+		result := DB.Model(model).Count(&count)
+		if result.Error != nil {
+			log.Err(result.Error)
+			return result.Error
+		}
+		return nil
+	})
+	if err != nil {
+		log.Err(err)
+		panic(err)
+	}
+	return &corndogsv1alpha1.GetQueueTaskCountsResponse{QueueCounts: queues, TotalTaskCount: count}, err
 }
 func (s PostgresStore) GetStateCounts(req *corndogsv1alpha1.GetStateCountsRequest) (*corndogsv1alpha1.GetStateCountsResponse, error) {
 	return &corndogsv1alpha1.GetStateCountsResponse{}, fmt.Errorf("Not implemented")
