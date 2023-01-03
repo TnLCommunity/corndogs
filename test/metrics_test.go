@@ -158,11 +158,12 @@ func TestGetQueueAndStateCounts(t *testing.T) {
 	}
 
 	getQueueAndStateCountsResponse, err := corndogsClient.GetQueueAndStateCounts(context.Background(), &corndogsv1alpha1.EmptyRequest{})
-	queueAndStateCounts := getQueueAndStateCountsResponse.QueueAndStateCounts
 	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+	queueAndStateCounts := getQueueAndStateCountsResponse.QueueAndStateCounts
 
 	for _, suffix := range queueSuffix {
-		require.Equal(t, testQueue, queueAndStateCounts[testQueue+suffix].Queue, "Queue name is not equal")
+		require.Contains(t, queueAndStateCounts, testQueue+suffix, "expected queue to exist in map")
+		require.Equal(t, testQueue+suffix, queueAndStateCounts[testQueue+suffix].Queue, "Queue name is not equal")
 		require.Equal(t, int64(2), queueAndStateCounts[testQueue+suffix].Count, "expected two tasks in queue")
 		require.Equal(t, int64(1), queueAndStateCounts[testQueue+suffix].StateCounts[currentState], "expected one task for initial state")
 		require.Equal(t, int64(1), queueAndStateCounts[testQueue+suffix].StateCounts[autoTargetState], "expected one task for auto target state")
