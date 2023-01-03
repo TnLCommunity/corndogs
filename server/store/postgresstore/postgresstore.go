@@ -379,7 +379,7 @@ func (s PostgresStore) CleanUpTimedOut(req *corndogsv1alpha1.CleanUpTimedOutRequ
 	return &corndogsv1alpha1.CleanUpTimedOutResponse{TimedOut: count}, err
 }
 
-func (s PostgresStore) GetQueues() (*corndogsv1alpha1.GetQueuesResponse, error) {
+func (s PostgresStore) GetQueues(req *corndogsv1alpha1.GetQueuesRequest) (*corndogsv1alpha1.GetQueuesResponse, error) {
 	queues := []string{}
 	var count int64 = 0
 	err := DB.Transaction(func(tx *gorm.DB) error {
@@ -403,7 +403,7 @@ func (s PostgresStore) GetQueues() (*corndogsv1alpha1.GetQueuesResponse, error) 
 	return &corndogsv1alpha1.GetQueuesResponse{Queues: queues, TotalTaskCount: count}, err
 }
 
-func (s PostgresStore) GetQueueTaskCounts() (*corndogsv1alpha1.GetQueueTaskCountsResponse, error) {
+func (s PostgresStore) GetQueueTaskCounts(req *corndogsv1alpha1.GetQueueTaskCountsRequest) (*corndogsv1alpha1.GetQueueTaskCountsResponse, error) {
 	queues := make(map[string]int64)
 	var count int64 = 0
 	err := DB.Transaction(func(tx *gorm.DB) error {
@@ -465,7 +465,7 @@ func (s PostgresStore) GetTaskStateCounts(req *corndogsv1alpha1.GetTaskStateCoun
 	}
 	return &corndogsv1alpha1.GetTaskStateCountsResponse{Queue: req.Queue, Count: count, StateCounts: stateCounts}, err
 }
-func (s PostgresStore) GetQueueAndStateCounts() (*corndogsv1alpha1.GetQueueAndStateCountsResponse, error) {
+func (s PostgresStore) GetQueueAndStateCounts(req *corndogsv1alpha1.GetQueueAndStateCountsRequest) (*corndogsv1alpha1.GetQueueAndStateCountsResponse, error) {
 	queueAndStateCounts := make(map[string]*corndogsv1alpha1.QueueAndStateCounts)
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{}

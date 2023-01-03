@@ -31,7 +31,7 @@ func TestGetQueues(t *testing.T) {
 	require.NotEmpty(t, submitTaskResponse.Task.UpdateTime, "update_time should not be empty")
 	require.NotEmpty(t, submitTaskResponse.Task.Uuid, "uuid should not be empty")
 
-	getQueuesResponse, err := corndogsClient.GetQueues(context.Background(), &corndogsv1alpha1.EmptyRequest{})
+	getQueuesResponse, err := corndogsClient.GetQueues(context.Background(), &corndogsv1alpha1.GetQueuesRequest{})
 	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
 	require.GreaterOrEqual(t, len(getQueuesResponse.Queues), 1, "expected at least one queue in list of queues")
 	require.GreaterOrEqual(t, getQueuesResponse.TotalTaskCount, int64(1), "expected a total_task_count value")
@@ -60,7 +60,7 @@ func TestGetQueueTaskCounts(t *testing.T) {
 	require.NotEmpty(t, submitTaskResponse.Task.UpdateTime, "update_time should not be empty")
 	require.NotEmpty(t, submitTaskResponse.Task.Uuid, "uuid should not be empty")
 
-	getQueueTaskCountsResponse, err := corndogsClient.GetQueueTaskCounts(context.Background(), &corndogsv1alpha1.EmptyRequest{})
+	getQueueTaskCountsResponse, err := corndogsClient.GetQueueTaskCounts(context.Background(), &corndogsv1alpha1.GetQueueTaskCountsRequest{})
 	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
 	require.GreaterOrEqual(t, len(getQueueTaskCountsResponse.QueueCounts), 1, "expected at least one queue in queue_counts")
 	require.GreaterOrEqual(t, getQueueTaskCountsResponse.TotalTaskCount, int64(1), "expected a total_task_count value")
@@ -157,7 +157,7 @@ func TestGetQueueAndStateCounts(t *testing.T) {
 		require.Equal(t, getNextTaskRequest.Queue, getNextTaskResponse.Task.Queue, "Queue name is not equal")
 	}
 
-	getQueueAndStateCountsResponse, err := corndogsClient.GetQueueAndStateCounts(context.Background(), &corndogsv1alpha1.EmptyRequest{})
+	getQueueAndStateCountsResponse, err := corndogsClient.GetQueueAndStateCounts(context.Background(), &corndogsv1alpha1.GetQueueAndStateCountsRequest{})
 	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
 	queueAndStateCounts := getQueueAndStateCountsResponse.QueueAndStateCounts
 
