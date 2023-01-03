@@ -1,3 +1,33 @@
+# [1.3.0](https://github.com/TnLCommunity/corndogs/compare/v1.2.0...v1.3.0) (2023-01-03)
+
+
+### Bug Fixes
+
+* add metrics methods to store interface ([110a24b](https://github.com/TnLCommunity/corndogs/commit/110a24b1d64e15993f6490578a4b8b9d7733dc8d))
+* add test for GetQueues ([f96b9ad](https://github.com/TnLCommunity/corndogs/commit/f96b9ad641f4fc0b758e07009c4c063c42ba3227))
+* add test for GetQueueTaskCounts ([78bfa23](https://github.com/TnLCommunity/corndogs/commit/78bfa23049df9220a54b4b6e7d7a03fc1b4f0113))
+* call error vars err instead of nil ([f1adbe1](https://github.com/TnLCommunity/corndogs/commit/f1adbe1c4aa6f2d14adc540e1b45b47f8aa60742))
+* initial readme docs for an overview of the metrics stuff ([f177404](https://github.com/TnLCommunity/corndogs/commit/f177404bca12e2dab207d5a3be8910641e0b3bf7))
+* move error check, add suffix to expected queue, add check for entry existing in map ([03d5152](https://github.com/TnLCommunity/corndogs/commit/03d51527d349db42c3bc3878a4c0353f2c96dcc9))
+* name of TestGetTaskStateCounts ([44abd55](https://github.com/TnLCommunity/corndogs/commit/44abd557902b0d1802b9b65b9466c3365475669e))
+* rename rpc to GetTaskStateCounts ([944eacd](https://github.com/TnLCommunity/corndogs/commit/944eacd02e83d8affcd116f6ae88a662c7bce228))
+* skaffold port forwarding for prometheus ([82b3230](https://github.com/TnLCommunity/corndogs/commit/82b3230fa57cdc0c25bdbbb95264c56a65165b95))
+* update implementations file with new rpc name ([a9cbd71](https://github.com/TnLCommunity/corndogs/commit/a9cbd71798c9225d7d56c7c75bcbea13234e506f))
+* update protos version ([f018e98](https://github.com/TnLCommunity/corndogs/commit/f018e9870aa8a9d00453320ff49e251a3a9ad92a))
+* use correct require check for comparing number of tasks in queue ([574b5aa](https://github.com/TnLCommunity/corndogs/commit/574b5aabca1a3976d3baaa2699b3ec5f2657f323))
+* use suffix in getNextTaskRequest ([80249a9](https://github.com/TnLCommunity/corndogs/commit/80249a9bf6fb393a0f94cfde15ef0e26e5d730bd))
+
+
+### Features
+
+* add GetQueues postgres implementation ([5f48e0b](https://github.com/TnLCommunity/corndogs/commit/5f48e0bef13be5cb0ccc97dabfea2be499b7bd7c))
+* add metrics implementations to call store methods ([81ab7b6](https://github.com/TnLCommunity/corndogs/commit/81ab7b68b4cd93a627b76ff04cd2aa3476be7b73))
+* add some basic metrics for total tasks, completed, canceled, and timed out task counts ([b7bd06c](https://github.com/TnLCommunity/corndogs/commit/b7bd06c9c849d9adb71e2e490fe0e453add4d929))
+* add test and implement GetTaskStateCounts ([e538175](https://github.com/TnLCommunity/corndogs/commit/e538175b483a9cb5df26f1a0283ca46a438c7209))
+* add test for GetQueueAndStateCounts ([e56f35a](https://github.com/TnLCommunity/corndogs/commit/e56f35ab210b248ee3ce5ab0d743286a419b2029))
+* implement GetQueueAndStateCounts for postgres store ([f589cf2](https://github.com/TnLCommunity/corndogs/commit/f589cf267f091b7692a9121c0b7c1538b9b3351c))
+* implement GetQueueTaskCounts ([9c188d5](https://github.com/TnLCommunity/corndogs/commit/9c188d51f5d3c939d229e18fd04db836eac8bb80))
+
 # [1.2.0](https://github.com/TnLCommunity/corndogs/compare/v1.1.0...v1.2.0) (2022-12-30)
 
 
