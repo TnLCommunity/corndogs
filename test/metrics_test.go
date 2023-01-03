@@ -148,7 +148,7 @@ func TestGetQueueAndStateCounts(t *testing.T) {
 
 		// Move one to the AutoTargetState
 		getNextTaskRequest := &corndogsv1alpha1.GetNextTaskRequest{
-			Queue:        testQueue,
+			Queue:        testQueue + suffix,
 			CurrentState: "testSubmitted",
 		}
 		getNextTaskResponse, err := corndogsClient.GetNextTask(context.Background(), getNextTaskRequest)
