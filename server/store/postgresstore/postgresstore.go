@@ -435,7 +435,7 @@ func (s PostgresStore) GetQueueTaskCounts() (*corndogsv1alpha1.GetQueueTaskCount
 	return &corndogsv1alpha1.GetQueueTaskCountsResponse{QueueCounts: queues, TotalTaskCount: count}, err
 }
 func (s PostgresStore) GetTaskStateCounts(req *corndogsv1alpha1.GetTaskStateCountsRequest) (*corndogsv1alpha1.GetTaskStateCountsResponse, error) {
-	state_counts := make(map[string]int64)
+	stateCounts := make(map[string]int64)
 	var count int64 = 0
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{}
@@ -449,7 +449,7 @@ func (s PostgresStore) GetTaskStateCounts(req *corndogsv1alpha1.GetTaskStateCoun
 			var key string
 			var value int64
 			rows.Scan(&key, &value)
-			state_counts[key] = value
+			stateCounts[key] = value
 		}
 
 		result := DB.Model(model).Where("queue = ?", req.Queue).Count(&count)
@@ -463,8 +463,38 @@ func (s PostgresStore) GetTaskStateCounts(req *corndogsv1alpha1.GetTaskStateCoun
 		log.Err(err)
 		panic(err)
 	}
-	return &corndogsv1alpha1.GetTaskStateCountsResponse{Queue: req.Queue, Count: count, StateCounts: state_counts}, err
+	return &corndogsv1alpha1.GetTaskStateCountsResponse{Queue: req.Queue, Count: count, StateCounts: stateCounts}, err
 }
 func (s PostgresStore) GetQueueAndStateCounts() (*corndogsv1alpha1.GetQueueAndStateCountsResponse, error) {
-	return &corndogsv1alpha1.GetQueueAndStateCountsResponse{}, fmt.Errorf("Not implemented")
+	queueAndStateCounts := make(map[string]*corndogsv1alpha1.QueueAndStateCounts)
+	err := DB.Transaction(func(tx *gorm.DB) error {
+		model := models.Task{}
+		rows, err := DB.Model(model).Select("queue", "current_state", "COUNT(current_state)").Group("queue").Group("current_state").Rows()
+		if err != nil {
+			log.Err(err)
+			return err
+		}
+		defer rows.Close()
+		for rows.Next() {
+			var queue string
+			var state string
+			var stateCount int64
+			rows.Scan(&queue, &state, &stateCount)
+			if _, ok := queueAndStateCounts[queue]; !ok {
+				queueAndStateCounts[queue] = &corndogsv1alpha1.QueueAndStateCounts{
+					Queue:       queue,
+					Count:       0,
+					StateCounts: make(map[string]int64),
+				}
+			}
+			queueAndStateCounts[queue].StateCounts[state] = stateCount
+			queueAndStateCounts[queue].Count += stateCount
+		}
+		return nil
+	})
+	if err != nil {
+		log.Err(err)
+		panic(err)
+	}
+	return &corndogsv1alpha1.GetQueueAndStateCountsResponse{QueueAndStateCounts: queueAndStateCounts}, err
 }
