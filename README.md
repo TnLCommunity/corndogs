@@ -78,6 +78,17 @@ A timeout does *not* happen automatically. You control when your timeout checks 
 
 Corndogs does provide some helper utilities for timeouts. There is a `timeout` command provided in the cli that will send a request at the current time using the address, port, and optional queue flags. There is also a simple cronjob provided by [the corndogs chart](https://github.com/TnLCommunity/chart-corndogs).
 
+### Priority
+
+A `priority` can be set when submitting a task and when updating a task. You must specify the priority in both or it will default to `0`. You can use a positive value to make sure it is prioritized by a GetNextTask request, or negative to make sure it is deprioritized.
+
+### State and Timeout overrides
+When using `GetNextTask` you can use the override fields to change what you get back. The current override fields are `override_current_state`, `override_auto_target_state`, and `override_timeout`. The timeout is pretty simple, it follows the same rules. The state overrides will override what you get back *after* the states are switched.
+
+A task with `current_state: A` and `auto_target_state: B`\
+gotten with `override_auto_target_state: C`\
+will return with `current_state: B` and `auto_target_state: C`
+
 ## Supported datastores
 
 Current targets are Postgres and room for others unplanned. The design is such that Corndogs should not know where it's storing things except in the Store implementation, it just gets pointed to a URL and picks up where it needs to. This is Cloud Native.
