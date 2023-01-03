@@ -8,8 +8,8 @@ import (
 	corndogsv1alpha1 "github.com/TnLCommunity/protos-corndogs/gen/proto/go/corndogs/v1alpha1"
 )
 
-func (s *V1Alpha1Server) MustGetTaskStateByID(ctx context.Context, req *corndogsv1alpha1.GetTaskStateByIDRequest) *corndogsv1alpha1.GetTaskStateByIDResponse {
-	response := store.AppStore.MustGetTaskStateByID(req)
+func (s *V1Alpha1Server) GetTaskStateByID(ctx context.Context, req *corndogsv1alpha1.GetTaskStateByIDRequest) *corndogsv1alpha1.GetTaskStateByIDResponse {
+	response := store.AppStore.GetTaskStateByID(req)
 	return response
 }
 

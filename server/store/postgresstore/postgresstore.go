@@ -87,7 +87,7 @@ func (s PostgresStore) SubmitTask(req *corndogsv1alpha1.SubmitTaskRequest) (*cor
 	return &corndogsv1alpha1.SubmitTaskResponse{Task: taskProto}, err
 }
 
-func (s PostgresStore) MustGetTaskStateByID(req *corndogsv1alpha1.GetTaskStateByIDRequest) *corndogsv1alpha1.GetTaskStateByIDResponse {
+func (s PostgresStore) GetTaskStateByID(req *corndogsv1alpha1.GetTaskStateByIDRequest) *corndogsv1alpha1.GetTaskStateByIDResponse {
 	taskProto := &corndogsv1alpha1.Task{}
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{UUID: req.Uuid}
