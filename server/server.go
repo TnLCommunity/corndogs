@@ -86,6 +86,7 @@ func run() error {
 		// register server with grpc_prometheus
 		grpc_prometheus.Register(server)
 		metrics.StartMetricsEndpoint()
+		metrics.InitializeMetrics()
 	}
 	// register health service (used in k8s health checks)
 	healthService := implementations.NewHealthChecker()

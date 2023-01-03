@@ -8,6 +8,7 @@ import (
 var LogLevel = GetEnvOrDefault("LOGLEVEL", "error")
 var FlushBytes = int64(GetEnvAsIntOrDefault("FLUSH_BYTES", "1000"))
 var PrometheusEnabled = GetEnvAsBoolOrDefault("PROMETHEUS_ENABLED", "false")
+var PrometheusNamespace = GetEnvOrDefault("PROMETHEUS_NAMESPACE", "corndogs")
 var DefaultQueue = GetEnvOrDefault("DEFAULT_QUEUE", "default")
 var DefaultStartingState = GetEnvOrDefault("DEFAULT_STARTING_STATE", "submitted")
 var DefaultTimeout = int64(GetEnvAsIntOrDefault("DEFAULT_TIMEOUT", "0"))

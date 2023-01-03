@@ -78,25 +78,15 @@ A timeout does *not* happen automatically. You control when your timeout checks 
 
 Corndogs does provide some helper utilities for timeouts. There is a `timeout` command provided in the cli that will send a request at the current time using the address, port, and optional queue flags. There is also a simple cronjob provided by [the corndogs chart](https://github.com/TnLCommunity/chart-corndogs).
 
-### Priority
-
-A `priority` can be set when submitting a task and when updating a task. You must specify the priority in both or it will default to `0`. You can use a positive value to make sure it is prioritized by a GetNextTask request, or negative to make sure it is deprioritized.
-
 ## Supported datastores
 
 Current targets are Postgres and room for others unplanned. The design is such that Corndogs should not know where it's storing things except in the Store implementation, it just gets pointed to a URL and picks up where it needs to. This is Cloud Native.
 
 ## Metrics and such
 
-Aside from logs and Prometheus metrics, a number of endpoints should be provided that allow intelligence around operation of or working against tasks. Some examples of statistical metrics that should be available in some way through normal request methods:
-
- * How many and what queues exist?
- * How many tasks are in flight in each queue? For each state?
- * How many tasks are waiting in each queue? For each state?
- * How many timeouts for each queue in each state?
- * What workers exist for each queue in the last N minutes?
- * What workers have what timeouts for a given window?
- * How many tasks completed in a time window? (This may allow historic views)
- * Length of time for tasks to be worked.
-
-These will be implemented after functionality is proven out.
+Aside from logs and Prometheus metrics, a few initial endpoints are provided that allow intelligence around operation of or working against tasks.
+Theres some overlap between these endpoints, but they allow for some flexibility for different use cases.
+- `GetQueues` will list all queues and the total tasks in the system.
+- `GetQueueTaskCounts` will return the amount of tasks in each queue, along with the total tasks in the system.
+- `GetTaskStateCounts` returns tasks per state for the requested queue, and the total tasks in the queue.
+- `GetQueueAndStateCounts` returns all queues, their tasks per state, and the total tasks in each queue.

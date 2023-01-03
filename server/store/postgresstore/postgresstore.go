@@ -378,3 +378,123 @@ func (s PostgresStore) CleanUpTimedOut(req *corndogsv1alpha1.CleanUpTimedOutRequ
 	}
 	return &corndogsv1alpha1.CleanUpTimedOutResponse{TimedOut: count}, err
 }
+
+func (s PostgresStore) GetQueues(req *corndogsv1alpha1.GetQueuesRequest) (*corndogsv1alpha1.GetQueuesResponse, error) {
+	queues := []string{}
+	var count int64 = 0
+	err := DB.Transaction(func(tx *gorm.DB) error {
+		model := models.Task{}
+		result := DB.Model(model).Select("queue").Distinct().Find(&queues)
+		if result.Error != nil {
+			log.Err(result.Error)
+			return result.Error
+		}
+		result = DB.Model(model).Count(&count)
+		if result.Error != nil {
+			log.Err(result.Error)
+			return result.Error
+		}
+		return nil
+	})
+	if err != nil {
+		log.Err(err)
+		panic(err)
+	}
+	return &corndogsv1alpha1.GetQueuesResponse{Queues: queues, TotalTaskCount: count}, err
+}
+
+func (s PostgresStore) GetQueueTaskCounts(req *corndogsv1alpha1.GetQueueTaskCountsRequest) (*corndogsv1alpha1.GetQueueTaskCountsResponse, error) {
+	queues := make(map[string]int64)
+	var count int64 = 0
+	err := DB.Transaction(func(tx *gorm.DB) error {
+		model := models.Task{}
+		rows, err := DB.Model(model).Select("queue", "COUNT(queue)").Group("queue").Rows()
+		defer rows.Close()
+		if err != nil {
+			log.Err(err)
+			return err
+		}
+		for rows.Next() {
+			var key string
+			var value int64
+			rows.Scan(&key, &value)
+			queues[key] = value
+		}
+
+		result := DB.Model(model).Count(&count)
+		if result.Error != nil {
+			log.Err(result.Error)
+			return result.Error
+		}
+		return nil
+	})
+	if err != nil {
+		log.Err(err)
+		panic(err)
+	}
+	return &corndogsv1alpha1.GetQueueTaskCountsResponse{QueueCounts: queues, TotalTaskCount: count}, err
+}
+func (s PostgresStore) GetTaskStateCounts(req *corndogsv1alpha1.GetTaskStateCountsRequest) (*corndogsv1alpha1.GetTaskStateCountsResponse, error) {
+	stateCounts := make(map[string]int64)
+	var count int64 = 0
+	err := DB.Transaction(func(tx *gorm.DB) error {
+		model := models.Task{}
+		rows, err := DB.Model(model).Select("current_state", "COUNT(current_state)").Where("queue = ?", req.Queue).Group("current_state").Rows()
+		defer rows.Close()
+		if err != nil {
+			log.Err(err)
+			return err
+		}
+		for rows.Next() {
+			var key string
+			var value int64
+			rows.Scan(&key, &value)
+			stateCounts[key] = value
+		}
+
+		result := DB.Model(model).Where("queue = ?", req.Queue).Count(&count)
+		if result.Error != nil {
+			log.Err(result.Error)
+			return result.Error
+		}
+		return nil
+	})
+	if err != nil {
+		log.Err(err)
+		panic(err)
+	}
+	return &corndogsv1alpha1.GetTaskStateCountsResponse{Queue: req.Queue, Count: count, StateCounts: stateCounts}, err
+}
+func (s PostgresStore) GetQueueAndStateCounts(req *corndogsv1alpha1.GetQueueAndStateCountsRequest) (*corndogsv1alpha1.GetQueueAndStateCountsResponse, error) {
+	queueAndStateCounts := make(map[string]*corndogsv1alpha1.QueueAndStateCounts)
+	err := DB.Transaction(func(tx *gorm.DB) error {
+		model := models.Task{}
+		rows, err := DB.Model(model).Select("queue", "current_state", "COUNT(current_state)").Group("queue").Group("current_state").Rows()
+		if err != nil {
+			log.Err(err)
+			return err
+		}
+		defer rows.Close()
+		for rows.Next() {
+			var queue string
+			var state string
+			var stateCount int64
+			rows.Scan(&queue, &state, &stateCount)
+			if _, ok := queueAndStateCounts[queue]; !ok {
+				queueAndStateCounts[queue] = &corndogsv1alpha1.QueueAndStateCounts{
+					Queue:       queue,
+					Count:       0,
+					StateCounts: make(map[string]int64),
+				}
+			}
+			queueAndStateCounts[queue].StateCounts[state] = stateCount
+			queueAndStateCounts[queue].Count += stateCount
+		}
+		return nil
+	})
+	if err != nil {
+		log.Err(err)
+		panic(err)
+	}
+	return &corndogsv1alpha1.GetQueueAndStateCountsResponse{QueueAndStateCounts: queueAndStateCounts}, err
+}
