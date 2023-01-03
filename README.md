@@ -90,3 +90,6 @@ Theres some overlap between these endpoints, but they allow for some flexibility
 - `GetQueueTaskCounts` will return the amount of tasks in each queue, along with the total tasks in the system.
 - `GetTaskStateCounts` returns tasks per state for the requested queue, and the total tasks in the queue.
 - `GetQueueAndStateCounts` returns all queues, their tasks per state, and the total tasks in each queue.
+
+## API docs
+[APIDOCS.md](./APIDOCS.md) has more granular descriptions and helpful links.
