@@ -1,3 +1,12 @@
+## [1.3.2](https://github.com/TnLCommunity/corndogs/compare/v1.3.1...v1.3.2) (2023-01-04)
+
+
+### Bug Fixes
+
+* add comments explaining decision to not rely on only uuid for archiving tasks ([46a17c3](https://github.com/TnLCommunity/corndogs/commit/46a17c39bfcdb37deeb79cd49d069b4ca8f94e85))
+* GetTaskStateByID description ([ebb730f](https://github.com/TnLCommunity/corndogs/commit/ebb730f0aa07c12900aceda7fac9fe82944ed961))
+* update status! ([762e5ef](https://github.com/TnLCommunity/corndogs/commit/762e5efaaca5e22b2dc74f495b72d6f890278209))
+
 ## [1.3.1](https://github.com/TnLCommunity/corndogs/compare/v1.3.0...v1.3.1) (2023-01-04)
 
 
