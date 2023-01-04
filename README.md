@@ -4,9 +4,7 @@ Cloud Native Background Task state manager for kubernetes and scaling out
 Inspired by Celery and Sidekick, but meant to be language and UI agnostic.
 
 ## Status
-Building a workflow. We are pre-alpha and not to be used for anything. Don't look at me, I'm hideous!
-
-We are a deploy-first, CI/CD oriented project, and thus are working on deployment before feature work.
+We are alpha and not used in production, but ready to support people who want to!
 
 ### But why `Corndogs`?
 
@@ -101,3 +99,6 @@ Theres some overlap between these endpoints, but they allow for some flexibility
 - `GetQueueTaskCounts` will return the amount of tasks in each queue, along with the total tasks in the system.
 - `GetTaskStateCounts` returns tasks per state for the requested queue, and the total tasks in the queue.
 - `GetQueueAndStateCounts` returns all queues, their tasks per state, and the total tasks in each queue.
+
+## API docs
+[APIDOCS.md](./APIDOCS.md) has more granular descriptions and helpful links.
