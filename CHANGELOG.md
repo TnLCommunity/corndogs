@@ -1,3 +1,15 @@
+## [1.3.1](https://github.com/TnLCommunity/corndogs/compare/v1.3.0...v1.3.1) (2023-01-04)
+
+
+### Bug Fixes
+
+* add back in queue to getTaskStateByIDRequest ([b41eece](https://github.com/TnLCommunity/corndogs/commit/b41eece4ea298625b87858f0a198ff0e55e77f01))
+* add test for GetTaskByStateID with an archived task ([33751d1](https://github.com/TnLCommunity/corndogs/commit/33751d14aaffd2b0a2d1a9686cb3a3756f57516d))
+* add test for GetTaskStateByID ([0219699](https://github.com/TnLCommunity/corndogs/commit/0219699f241425e7e2c3eca3a957b4994ac148ba))
+* comment out port forward for prometheus, peeps can uncomment it when they need it ([97c2eaf](https://github.com/TnLCommunity/corndogs/commit/97c2eaf9a3b0cce8cd6a264955de7d5489bd6a18))
+* rename to GetTaskStateByID ([d5c2fed](https://github.com/TnLCommunity/corndogs/commit/d5c2fed1526de58c0fb260c103ec116dcb53a1db))
+* return types, use Must naming in go server stuff, and use Get naming for protos ([0fecfb5](https://github.com/TnLCommunity/corndogs/commit/0fecfb5a1a285618576f427c0b2597286562679c))
+
 # [1.3.0](https://github.com/TnLCommunity/corndogs/compare/v1.2.0...v1.3.0) (2023-01-03)
 
 
