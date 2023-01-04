@@ -189,7 +189,8 @@ func TestGetTaskStateByID(t *testing.T) {
 	require.NotNil(t, submitTaskResponse.Task, "Task in response was nil")
 
 	getTaskStateByIDRequest := &corndogsv1alpha1.GetTaskStateByIDRequest{
-		Uuid: task.Uuid,
+		Queue: task.Queue,
+		Uuid:  task.Uuid,
 	}
 	getTaskStateByIDResponse, err := corndogsClient.GetTaskStateByID(context.Background(), getTaskStateByIDRequest)
 	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
@@ -230,7 +231,8 @@ func TestGetTaskStateByIDArchived(t *testing.T) {
 	task := completeTaskResponse.Task
 
 	getTaskStateByIDRequest := &corndogsv1alpha1.GetTaskStateByIDRequest{
-		Uuid: task.Uuid,
+		Queue: task.Queue,
+		Uuid:  task.Uuid,
 	}
 	getTaskStateByIDResponse, err := corndogsClient.GetTaskStateByID(context.Background(), getTaskStateByIDRequest)
 	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
