@@ -9,7 +9,7 @@ Used for submitting a new task to a `queue`.\
 Returns the created task.
 
 ### `GetTaskStateByID`
-Gets a task by the `uuid` and `queue`. Will return archived tasks.
+Gets a task by the `uuid`. Will return archived tasks.
 
 ### `GetNextTask`
 Gets the next task from `queue` that has the same `current_state`.\
