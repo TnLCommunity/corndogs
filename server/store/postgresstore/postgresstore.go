@@ -268,6 +268,8 @@ func (s PostgresStore) UpdateTask(req *corndogsv1alpha1.UpdateTaskRequest) (*cor
 func (s PostgresStore) CompleteTask(req *corndogsv1alpha1.CompleteTaskRequest) (*corndogsv1alpha1.CompleteTaskResponse, error) {
 	taskProto := &corndogsv1alpha1.Task{}
 	err := DB.Transaction(func(tx *gorm.DB) error {
+		// Queue and CurrentState are required to validate you know the current state
+		// and not accidentally pass something someone else is working on
 		model := models.Task{
 			UUID:         req.Uuid,
 			Queue:        req.Queue,
@@ -308,6 +310,8 @@ func (s PostgresStore) CompleteTask(req *corndogsv1alpha1.CompleteTaskRequest) (
 func (s PostgresStore) CancelTask(req *corndogsv1alpha1.CancelTaskRequest) (*corndogsv1alpha1.CancelTaskResponse, error) {
 	taskProto := &corndogsv1alpha1.Task{}
 	err := DB.Transaction(func(tx *gorm.DB) error {
+		// Queue and CurrentState are required to validate you know the current state
+		// and not accidentally pass something someone else is working on
 		model := models.Task{
 			UUID:         req.Uuid,
 			Queue:        req.Queue,
