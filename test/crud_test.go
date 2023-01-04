@@ -201,6 +201,47 @@ func TestGetTaskStateByID(t *testing.T) {
 	require.Equal(t, getTaskStateByIDResponse.Task.Payload, task.Payload, "Payload is not equal")
 }
 
+func TestGetTaskStateByIDArchived(t *testing.T) {
+	testID := GetTestID()
+	corndogsClient := GetCorndogsClient()
+	workingTaskSuffix := "-working"
+	testPayload := []byte("testPayload" + testID)
+
+	submitTaskRequest := &corndogsv1alpha1.SubmitTaskRequest{
+		Queue:           "testQueue" + testID,
+		CurrentState:    "testSubmitted",
+		AutoTargetState: "testSubmitted" + workingTaskSuffix,
+		Timeout:         -1, // No timeout
+		Payload:         testPayload,
+	}
+
+	submitTaskResponse, err := corndogsClient.SubmitTask(context.Background(), submitTaskRequest)
+	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+	require.NotNil(t, submitTaskResponse.Task, "Task in response was nil")
+
+	completeTaskRequest := &corndogsv1alpha1.CompleteTaskRequest{
+		Uuid:         submitTaskResponse.Task.Uuid,
+		Queue:        submitTaskResponse.Task.Queue,
+		CurrentState: submitTaskResponse.Task.CurrentState,
+	}
+	completeTaskResponse, err := corndogsClient.CompleteTask(context.Background(), completeTaskRequest)
+	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+	require.NotNil(t, completeTaskResponse.Task, "Task in response was nil")
+	task := completeTaskResponse.Task
+
+	getTaskStateByIDRequest := &corndogsv1alpha1.GetTaskStateByIDRequest{
+		Uuid: task.Uuid,
+	}
+	getTaskStateByIDResponse, err := corndogsClient.GetTaskStateByID(context.Background(), getTaskStateByIDRequest)
+	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+	require.NotNil(t, getTaskStateByIDResponse.Task, "Task in response was nil")
+	require.Equal(t, getTaskStateByIDResponse.Task.Queue, task.Queue, "Queue name is not equal")
+	require.Equal(t, getTaskStateByIDResponse.Task.Uuid, task.Uuid, "uuid is not equal")
+	require.Equal(t, getTaskStateByIDResponse.Task.CurrentState, task.CurrentState, "CurrentState is not equal")
+	require.Equal(t, getTaskStateByIDResponse.Task.AutoTargetState, task.AutoTargetState, "AutoTargetState is not equal")
+	require.Equal(t, getTaskStateByIDResponse.Task.Payload, task.Payload, "Payload is not equal")
+}
+
 func GetCorndogsClient() corndogsv1alpha1.CorndogsServiceClient {
 	// connect
 	connectTo := "127.0.0.1:5080"
