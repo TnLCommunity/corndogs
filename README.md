@@ -4,9 +4,7 @@ Cloud Native Background Task state manager for kubernetes and scaling out
 Inspired by Celery and Sidekick, but meant to be language and UI agnostic.
 
 ## Status
-Building a workflow. We are pre-alpha and not to be used for anything. Don't look at me, I'm hideous!
-
-We are a deploy-first, CI/CD oriented project, and thus are working on deployment before feature work.
+We are alpha and not used in production, but ready to support people who want to!
 
 ### But why `Corndogs`?
 
