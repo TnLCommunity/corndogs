@@ -156,6 +156,94 @@ func TestGetNextTaskOverrideState(t *testing.T) {
 	require.Equal(t, getNextTaskRequest.OverrideAutoTargetState, getNextTaskResponse.Task.AutoTargetState, "Task AutoTargetState is not overridden")
 }
 
+func TestGetTaskStateByID(t *testing.T) {
+	testID := GetTestID()
+	corndogsClient := GetCorndogsClient()
+	workingTaskSuffix := "-working"
+	testPayload := []byte("testPayload" + testID)
+
+	submitTaskRequest := &corndogsv1alpha1.SubmitTaskRequest{
+		Queue:           "testQueue" + testID,
+		CurrentState:    "testSubmitted",
+		AutoTargetState: "testSubmitted" + workingTaskSuffix,
+		Timeout:         -1, // No timeout
+		Payload:         testPayload,
+	}
+	// Just going to sandwich the task we want so it doesnt get grabbed
+	// accidentally via the lastest or oldest entry by default
+	submitTaskResponse, err := corndogsClient.SubmitTask(context.Background(), submitTaskRequest)
+	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+	require.NotNil(t, submitTaskResponse.Task, "Task in response was nil")
+	require.Equal(t, submitTaskRequest.Queue, submitTaskResponse.Task.Queue, "Queue name is not equal")
+	require.NotEmpty(t, submitTaskResponse.Task.SubmitTime, "submit_time should not be empty")
+	require.NotEmpty(t, submitTaskResponse.Task.UpdateTime, "update_time should not be empty")
+	require.NotEmpty(t, submitTaskResponse.Task.Uuid, "uuid should not be empty")
+
+	submitTaskResponse, err = corndogsClient.SubmitTask(context.Background(), submitTaskRequest)
+	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+	require.NotNil(t, submitTaskResponse.Task, "Task in response was nil")
+	task := submitTaskResponse.Task
+
+	submitTaskResponse, err = corndogsClient.SubmitTask(context.Background(), submitTaskRequest)
+	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+	require.NotNil(t, submitTaskResponse.Task, "Task in response was nil")
+
+	getTaskStateByIDRequest := &corndogsv1alpha1.GetTaskStateByIDRequest{
+		Queue: task.Queue,
+		Uuid:  task.Uuid,
+	}
+	getTaskStateByIDResponse, err := corndogsClient.GetTaskStateByID(context.Background(), getTaskStateByIDRequest)
+	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+	require.NotNil(t, getTaskStateByIDResponse.Task, "Task in response was nil")
+	require.Equal(t, getTaskStateByIDResponse.Task.Queue, task.Queue, "Queue name is not equal")
+	require.Equal(t, getTaskStateByIDResponse.Task.Uuid, task.Uuid, "uuid is not equal")
+	require.Equal(t, getTaskStateByIDResponse.Task.CurrentState, task.CurrentState, "CurrentState is not equal")
+	require.Equal(t, getTaskStateByIDResponse.Task.AutoTargetState, task.AutoTargetState, "AutoTargetState is not equal")
+	require.Equal(t, getTaskStateByIDResponse.Task.Payload, task.Payload, "Payload is not equal")
+}
+
+func TestGetTaskStateByIDArchived(t *testing.T) {
+	testID := GetTestID()
+	corndogsClient := GetCorndogsClient()
+	workingTaskSuffix := "-working"
+	testPayload := []byte("testPayload" + testID)
+
+	submitTaskRequest := &corndogsv1alpha1.SubmitTaskRequest{
+		Queue:           "testQueue" + testID,
+		CurrentState:    "testSubmitted",
+		AutoTargetState: "testSubmitted" + workingTaskSuffix,
+		Timeout:         -1, // No timeout
+		Payload:         testPayload,
+	}
+
+	submitTaskResponse, err := corndogsClient.SubmitTask(context.Background(), submitTaskRequest)
+	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+	require.NotNil(t, submitTaskResponse.Task, "Task in response was nil")
+
+	completeTaskRequest := &corndogsv1alpha1.CompleteTaskRequest{
+		Uuid:         submitTaskResponse.Task.Uuid,
+		Queue:        submitTaskResponse.Task.Queue,
+		CurrentState: submitTaskResponse.Task.CurrentState,
+	}
+	completeTaskResponse, err := corndogsClient.CompleteTask(context.Background(), completeTaskRequest)
+	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+	require.NotNil(t, completeTaskResponse.Task, "Task in response was nil")
+	task := completeTaskResponse.Task
+
+	getTaskStateByIDRequest := &corndogsv1alpha1.GetTaskStateByIDRequest{
+		Queue: task.Queue,
+		Uuid:  task.Uuid,
+	}
+	getTaskStateByIDResponse, err := corndogsClient.GetTaskStateByID(context.Background(), getTaskStateByIDRequest)
+	require.Nil(t, err, fmt.Sprintf("error should be nil. error: \n%v", err))
+	require.NotNil(t, getTaskStateByIDResponse.Task, "Task in response was nil")
+	require.Equal(t, getTaskStateByIDResponse.Task.Queue, task.Queue, "Queue name is not equal")
+	require.Equal(t, getTaskStateByIDResponse.Task.Uuid, task.Uuid, "uuid is not equal")
+	require.Equal(t, getTaskStateByIDResponse.Task.CurrentState, task.CurrentState, "CurrentState is not equal")
+	require.Equal(t, getTaskStateByIDResponse.Task.AutoTargetState, task.AutoTargetState, "AutoTargetState is not equal")
+	require.Equal(t, getTaskStateByIDResponse.Task.Payload, task.Payload, "Payload is not equal")
+}
+
 func GetCorndogsClient() corndogsv1alpha1.CorndogsServiceClient {
 	// connect
 	connectTo := "127.0.0.1:5080"
