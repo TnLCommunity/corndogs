@@ -14,3 +14,35 @@ jobs:
       - uses: tnlcommunity/action-release-update-chart@v1
         with:
           token: ${{ secrets.GIT_RUNNER_TOKEN }}
+  semantic-release:
+    name: Semantic Release
+    runs-on: ubuntu-latest
+    outputs:
+      new_release_published: "${{ steps.release.outputs.new_release_published }}"
+      new_release_version: "${{ steps.release.outputs.new_release_version }}"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GIT_RUNNER_TOKEN }}
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@v2
+        # with:
+        #   install: true      -
+      - name: Release
+        id: release
+        uses: cycjimmy/semantic-release-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_RUNNER_TOKEN }}
+          DOCKER_REGISTRY_USER: ${{ secrets.QUAY_USER }}
+          DOCKER_REGISTRY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
+        with:
+          extra_plugins: |
+            conventional-changelog-conventionalcommits
+            @semantic-release/commit-analyzer
+            @semantic-release/release-notes-generator
+            @semantic-release/changelog
+            @semantic-release/exec
+            @semantic-release/git
+            @semantic-release/github
+            @codedependant/semantic-release-docker
