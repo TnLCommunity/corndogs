@@ -1,4 +1,4 @@
-apiVersion: skaffold/v2beta23
+apiVersion: skaffold/v2beta25
 kind: Config
 build:
   artifacts:
@@ -33,3 +33,5 @@ deploy:
         helm: {}
       valuesFiles:
         - values-skaffold-local.yaml
+      recreatePods: true
+      wait: true
