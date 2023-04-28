@@ -16,6 +16,8 @@ jobs:
             fix
             feat
             norelease
+            chore
+            build
         env:
           GITHUB_TOKEN: ${{ github.token }}
   pipeline:

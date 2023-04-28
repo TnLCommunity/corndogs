@@ -1,17 +1,15 @@
-
 name: Release
 on:
-  pull_request:
-    types:
-      - closed
+  push:
     branches:
       - main
 jobs:
   release:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     name: Release and update helm chart
     steps:
-      - uses: tnlcommunity/action-release-update-chart@v1
+      - uses: catalystsquad/action-release-update-chart@v1
         with:
           token: ${{ secrets.GIT_RUNNER_TOKEN }}
   semantic-release:
