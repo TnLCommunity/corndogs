@@ -35,6 +35,7 @@ jobs:
           DOCKER_REGISTRY_USER: ${{ secrets.QUAY_USER }}
           DOCKER_REGISTRY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
         with:
+          branches: "['main']"
           extra_plugins: |
             conventional-changelog-conventionalcommits
             @semantic-release/commit-analyzer
