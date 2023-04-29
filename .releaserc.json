@@ -1,0 +1,21 @@
+{
+  "branches": [
+    "main"
+  ],
+  "ci": false,
+  "plugins": [
+    ["@semantic-release/commit-analyzer", {
+      "preset":  "conventionalcommits",
+      "releaseRules": [
+        {"scope": "norelease", "release": false}
+      ]
+    }],
+    "@semantic-release/release-notes-generator",
+    "@semantic-release/changelog",
+    "@semantic-release/npm",
+    ["@semantic-release/git", {
+      "message": "semantic-release-bot chore(release): ${nextRelease.version} \n\n${nextRelease.notes}"
+    }],
+    "@semantic-release/github"
+  ]
+}

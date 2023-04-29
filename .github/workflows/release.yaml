@@ -1,8 +1,12 @@
 name: Release
 on:
-  push:
+  pull_request:
+    types:
+      - closed
     branches:
       - main
+    paths-ignore:
+      - .github/
 jobs:
   semantic-release:
     name: Semantic Release
@@ -27,6 +31,7 @@ jobs:
           DOCKER_REGISTRY_USER: ${{ secrets.QUAY_USER }}
           DOCKER_REGISTRY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
         with:
+          ci: false
           branches: "['main']"
           extra_plugins: |
             conventional-changelog-conventionalcommits
@@ -37,6 +42,25 @@ jobs:
             @semantic-release/git
             @semantic-release/github
             @codedependant/semantic-release-docker
-      - uses: catalystsquad/action-release-update-chart@v1
+      - if: steps.release.outputs.new_release_published == 'true'
+        name: Checkout helm chart
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ github.repository_owner }}/chart-${{ github.event.repository.name }}
+          token: ${{ secrets.GIT_RUNNER_TOKEN }}
+          ref: main
+      - if: steps.release.outputs.new_release_published == 'true'
+        name: Update appVersion
+        shell: bash
+        run: |
+          sed -i "0,/appVersion:.*/s//appVersion: \"${{ steps.release.outputs.new_release_version }}\"/g" chart/Chart.yaml
+      - if: steps.release.outputs.new_release_published == 'true'
+        uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GIT_RUNNER_TOKEN }}
+          title: ${{ github.event.pull_request.title }}
+          body: 'Automated changes triggered by [pull request](${{ github.event.pull_request._links.html.href }})<br />${{ github.event.pull_request.body }}'
+          commit-message: ${{ github.event.pull_request.title }}
+          branch: 'main${{ steps.release.outputs.new_release_version }}'
+          delete-branch: true
+          labels: automerge
