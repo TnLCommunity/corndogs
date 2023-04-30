@@ -24,3 +24,7 @@ gen/
 # Helm dependency stuff
 chart/Chart.lock
 chart/charts/
+
+# Node nonsense
+node_modules
+package-lock.json
