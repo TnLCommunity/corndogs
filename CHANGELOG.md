@@ -1,3 +1,10 @@
+## [1.3.8](https://github.com/TnLCommunity/corndogs/compare/v1.3.7...v1.3.8) (2023-05-04)
+
+
+### Bug Fixes
+
+* now with more creds ([#48](https://github.com/TnLCommunity/corndogs/issues/48)) ([32d7369](https://github.com/TnLCommunity/corndogs/commit/32d7369d7e998f7c58f977d16548ed655034fb6d))
+
 ## [1.3.7](https://github.com/TnLCommunity/corndogs/compare/v1.3.6...v1.3.7) (2023-05-04)
 
 
