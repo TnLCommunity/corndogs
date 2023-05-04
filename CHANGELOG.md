@@ -1,3 +1,10 @@
+## [1.3.9](https://github.com/TnLCommunity/corndogs/compare/v1.3.8...v1.3.9) (2023-05-04)
+
+
+### Bug Fixes
+
+* now the community is spelled right ([#49](https://github.com/TnLCommunity/corndogs/issues/49)) ([c9bced1](https://github.com/TnLCommunity/corndogs/commit/c9bced1f7cde1d79bb4777fed2a2f63f0d1ff2ae))
+
 ## [1.3.8](https://github.com/TnLCommunity/corndogs/compare/v1.3.7...v1.3.8) (2023-05-04)
 
 
