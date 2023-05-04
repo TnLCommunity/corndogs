@@ -52,7 +52,7 @@ jobs:
             @codedependant/semantic-release-docker
       - if: steps.release.outputs.new_release_published == 'true'
         name: Checkout helm chart
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: ${{ github.repository_owner }}/chart-${{ github.event.repository.name }}
           token: ${{ secrets.GIT_RUNNER_TOKEN }}
