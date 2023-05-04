@@ -17,6 +17,10 @@
       "message": "semantic-release-bot chore(release): ${nextRelease.version} \n\n${nextRelease.notes}"
     }],
     "@semantic-release/github",
-    "@codedependant/semantic-release-docker"
+    ["@codedependant/semantic-release-docker", {
+      "dockerRegistry": "quay.io",
+      "dockerImage": "corndogs",
+      "dockerProject": "tnlcommunity"
+    }]
   ]
 }
