@@ -50,7 +50,6 @@ A "task" is just a row in a db with the following fields:
  * Timeout (null if waiting for pulling, otherwise number of seconds until it "times out")
  * Payload (a bytestring, package it however you want. JSON, msgpack, whatever)
 
-
 ## Flow
 
 Corndogs doesn't work on tasks. It is a task state manager.
