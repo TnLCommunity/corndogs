@@ -16,6 +16,7 @@
     ["@semantic-release/git", {
       "message": "semantic-release-bot chore(release): ${nextRelease.version} \n\n${nextRelease.notes}"
     }],
-    "@semantic-release/github"
+    "@semantic-release/github",
+    "@codedependant/semantic-release-docker"
   ]
 }
