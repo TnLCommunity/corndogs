@@ -1,5 +1,4 @@
 # Corndogs
-
 Cloud Native Background Task state manager for kubernetes and scaling out
 
 Inspired by Celery and Sidekick, but meant to be language and UI agnostic.
