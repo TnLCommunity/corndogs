@@ -30,6 +30,9 @@ jobs:
       #     cache: npm
       # - name: NPM Clean Install
       #   run: npm ci
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14
       - name: Release
         id: release
         uses: cycjimmy/semantic-release-action@v3
