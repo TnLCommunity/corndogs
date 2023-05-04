@@ -1,3 +1,16 @@
+## [1.3.5](https://github.com/TnLCommunity/corndogs/compare/v1.3.4...v1.3.5) (2023-05-04)
+
+
+### Bug Fixes
+
+* adjust workflows for semantic-release-nonsense ([345d767](https://github.com/TnLCommunity/corndogs/commit/345d767939a9a37173cfdcac973a74757d88ca0f))
+* remove dependency from package.json to fix release ([#39](https://github.com/TnLCommunity/corndogs/issues/39)) ([af211fb](https://github.com/TnLCommunity/corndogs/commit/af211fb1fe05be7d3eb6042ccd6a3509bf24d28d))
+* remove git args from dockerfile ([#40](https://github.com/TnLCommunity/corndogs/issues/40)) ([2b4448e](https://github.com/TnLCommunity/corndogs/commit/2b4448e7422519681586004c06f396030b8113d8))
+* remove package.json entries ([d784228](https://github.com/TnLCommunity/corndogs/commit/d7842284df5fa26859d2757597e452ade9caf011))
+* remove semantic-release-monorepo as irrelevant here ([a01766c](https://github.com/TnLCommunity/corndogs/commit/a01766c48ad719df863e29139ab5df7fa71736b0))
+* set semantic version ([#41](https://github.com/TnLCommunity/corndogs/issues/41)) ([2761f4b](https://github.com/TnLCommunity/corndogs/commit/2761f4b6209cf5b7ab01c096f4fd644540530fb3))
+* update grpc-health-probe ([21b964d](https://github.com/TnLCommunity/corndogs/commit/21b964d1bacbfb3f504306294b77bcfe9d258cc6))
+
 ## [1.3.2](https://github.com/TnLCommunity/corndogs/compare/v1.3.1...v1.3.2) (2023-01-04)
 
 
