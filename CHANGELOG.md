@@ -1,3 +1,10 @@
+## [1.3.6](https://github.com/TnLCommunity/corndogs/compare/v1.3.5...v1.3.6) (2023-05-04)
+
+
+### Bug Fixes
+
+* add docker release ([#44](https://github.com/TnLCommunity/corndogs/issues/44)) ([c82ab40](https://github.com/TnLCommunity/corndogs/commit/c82ab403f79b3e2c682b26929dfe7c3f124722a1))
+
 ## [1.3.5](https://github.com/TnLCommunity/corndogs/compare/v1.3.4...v1.3.5) (2023-05-04)
 
 
