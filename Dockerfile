@@ -1,6 +1,4 @@
 FROM golang:1.20 as builder
-ARG gitUser
-ARG gitPassword
 
 WORKDIR /workspace
 # install grpc health probe
