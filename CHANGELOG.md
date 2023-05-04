@@ -1,3 +1,10 @@
+## [1.3.7](https://github.com/TnLCommunity/corndogs/compare/v1.3.6...v1.3.7) (2023-05-04)
+
+
+### Bug Fixes
+
+* make change to do release ([#47](https://github.com/TnLCommunity/corndogs/issues/47)) ([5c1df6d](https://github.com/TnLCommunity/corndogs/commit/5c1df6d190534625a22b274cbb6ba44baaaccebf))
+
 ## [1.3.6](https://github.com/TnLCommunity/corndogs/compare/v1.3.5...v1.3.6) (2023-05-04)
 
 
