@@ -38,6 +38,7 @@ jobs:
           DOCKER_REGISTRY_USER: ${{ secrets.QUAY_USER }}
           DOCKER_REGISTRY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
         with:
+          semantic_version: 19.0.5
           ci: false
           branches: "['main']"
           extra_plugins: |
