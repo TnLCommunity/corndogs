@@ -1,3 +1,10 @@
+## [1.3.10](https://github.com/TnLCommunity/corndogs/compare/v1.3.9...v1.3.10) (2023-05-04)
+
+
+### Bug Fixes
+
+* setup full update with chart ([#50](https://github.com/TnLCommunity/corndogs/issues/50)) ([ce3d243](https://github.com/TnLCommunity/corndogs/commit/ce3d243adb29c50d1015a5b1814cfea04e447933))
+
 ## [1.3.9](https://github.com/TnLCommunity/corndogs/compare/v1.3.8...v1.3.9) (2023-05-04)
 
 
