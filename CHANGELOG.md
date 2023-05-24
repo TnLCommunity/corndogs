@@ -1,3 +1,10 @@
+## [1.3.12](https://github.com/TnLCommunity/corndogs/compare/v1.3.11...v1.3.12) (2023-05-24)
+
+
+### Bug Fixes
+
+* Fix last usage of DB.Create ([#52](https://github.com/TnLCommunity/corndogs/issues/52)) ([6b81a44](https://github.com/TnLCommunity/corndogs/commit/6b81a4455df7ca314a2858fe3093105b6d795d32))
+
 ## [1.3.11](https://github.com/TnLCommunity/corndogs/compare/v1.3.10...v1.3.11) (2023-05-24)
 
 
