@@ -1,3 +1,10 @@
+## [1.3.11](https://github.com/TnLCommunity/corndogs/compare/v1.3.10...v1.3.11) (2023-05-24)
+
+
+### Bug Fixes
+
+* use transaction object instead of DB object ([#51](https://github.com/TnLCommunity/corndogs/issues/51)) ([f78ed9f](https://github.com/TnLCommunity/corndogs/commit/f78ed9f477a35abc06e11eeba5e7b3673ddbfa68))
+
 ## [1.3.10](https://github.com/TnLCommunity/corndogs/compare/v1.3.9...v1.3.10) (2023-05-04)
 
 
