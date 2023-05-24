@@ -76,7 +76,7 @@ func (s PostgresStore) SubmitTask(req *corndogsv1alpha1.SubmitTaskRequest) (*cor
 			Priority:        req.Priority,
 			Payload:         req.Payload,
 		}
-		result := DB.Create(&model)
+		result := tx.Create(&model)
 		if result.Error != nil {
 			log.Err(result.Error)
 			return result.Error
