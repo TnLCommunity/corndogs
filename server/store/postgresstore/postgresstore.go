@@ -31,6 +31,7 @@ var MaxOpenConns = config.GetEnvAsIntOrDefault("DATABASE_MAX_OPEN_CONNS", "10")
 var ConnMaxLifetime = time.Duration(config.GetEnvAsIntOrDefault("DATABASE_CONN_MAX_LIFETIME_SECONDS", "3600")) * time.Second
 
 // sql files embedded at compile time, used by goose
+//
 //go:embed migrations/*.sql
 var embedMigrations embed.FS
 
@@ -91,11 +92,11 @@ func (s PostgresStore) MustGetTaskStateByID(req *corndogsv1alpha1.GetTaskStateBy
 	taskProto := &corndogsv1alpha1.Task{}
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{UUID: req.Uuid}
-		result := DB.First(&model)
+		result := tx.First(&model)
 		if result.Error != nil {
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 				archived_model := models.ArchivedTask{UUID: req.Uuid}
-				archived_result := DB.First(&archived_model)
+				archived_result := tx.First(&archived_model)
 				if archived_result.Error != nil {
 					if errors.Is(archived_result.Error, gorm.ErrRecordNotFound) {
 						// not found return nil
@@ -129,7 +130,7 @@ func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*c
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{}
 		var nextUuid string
-		result := DB.Raw(
+		result := tx.Raw(
 			`UPDATE tasks SET current_state = current_state || ?
 				 WHERE uuid = (
 					 SELECT uuid FROM tasks
@@ -169,7 +170,7 @@ func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*c
 			return nil
 		}
 		model.UUID = nextUuid
-		result = DB.First(&model)
+		result = tx.First(&model)
 		if result.Error != nil {
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) || result.RowsAffected == 0 {
 				// not found return nil
@@ -196,7 +197,7 @@ func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*c
 			model.Timeout = req.OverrideTimeout
 		}
 
-		result = DB.Save(model)
+		result = tx.Save(model)
 		if result.Error != nil {
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) || result.RowsAffected == 0 {
 				// not found return nil
@@ -225,7 +226,7 @@ func (s PostgresStore) UpdateTask(req *corndogsv1alpha1.UpdateTaskRequest) (*cor
 			Queue:        req.Queue,
 			CurrentState: req.CurrentState,
 		}
-		result := DB.First(&model)
+		result := tx.First(&model)
 		if result.Error != nil {
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 				// not found return nil
@@ -243,7 +244,7 @@ func (s PostgresStore) UpdateTask(req *corndogsv1alpha1.UpdateTaskRequest) (*cor
 		if len(req.Payload) > 0 {
 			model.Payload = req.Payload
 		}
-		result = DB.Save(&model)
+		result = tx.Save(&model)
 		if result.Error != nil {
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 				// not found return nil
@@ -275,7 +276,7 @@ func (s PostgresStore) CompleteTask(req *corndogsv1alpha1.CompleteTaskRequest) (
 			Queue:        req.Queue,
 			CurrentState: req.CurrentState,
 		}
-		result := DB.First(&model)
+		result := tx.First(&model)
 		if result.Error != nil {
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 				// not found return nil
@@ -289,11 +290,11 @@ func (s PostgresStore) CompleteTask(req *corndogsv1alpha1.CompleteTaskRequest) (
 		archiveModel := models.ConvertTaskForArchive(model)
 		archiveModel.CurrentState = "completed"
 		archiveModel.AutoTargetState = "completed"
-		result = DB.Create(&archiveModel)
+		result = tx.Create(&archiveModel)
 		if result.Error != nil {
 			return result.Error
 		}
-		result = DB.Delete(&model)
+		result = tx.Delete(&model)
 		if result.Error != nil {
 			return result.Error
 		}
@@ -317,7 +318,7 @@ func (s PostgresStore) CancelTask(req *corndogsv1alpha1.CancelTaskRequest) (*cor
 			Queue:        req.Queue,
 			CurrentState: req.CurrentState,
 		}
-		result := DB.First(&model)
+		result := tx.First(&model)
 		if result.Error != nil {
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 				// not found return nil
@@ -331,12 +332,12 @@ func (s PostgresStore) CancelTask(req *corndogsv1alpha1.CancelTaskRequest) (*cor
 		archiveModel := models.ConvertTaskForArchive(model)
 		archiveModel.CurrentState = "canceled"
 		archiveModel.AutoTargetState = "canceled"
-		result = DB.Create(&archiveModel)
+		result = tx.Create(&archiveModel)
 		if result.Error != nil {
 			log.Err(result.Error)
 			return result.Error
 		}
-		result = DB.Delete(&model)
+		result = tx.Delete(&model)
 		if result.Error != nil {
 			log.Err(result.Error)
 			return result.Error
@@ -355,7 +356,7 @@ func (s PostgresStore) CleanUpTimedOut(req *corndogsv1alpha1.CleanUpTimedOutRequ
 	var count int64 = 0
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{}
-		result := DB.Model(model).Where(`
+		result := tx.Model(model).Where(`
 			timeout > 0 AND
 			(update_time + (timeout * ?)) < ? AND
 			((? = '') OR (? <> '' AND queue = ?))
@@ -388,12 +389,12 @@ func (s PostgresStore) GetQueues(req *corndogsv1alpha1.GetQueuesRequest) (*cornd
 	var count int64 = 0
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{}
-		result := DB.Model(model).Select("queue").Distinct().Find(&queues)
+		result := tx.Model(model).Select("queue").Distinct().Find(&queues)
 		if result.Error != nil {
 			log.Err(result.Error)
 			return result.Error
 		}
-		result = DB.Model(model).Count(&count)
+		result = tx.Model(model).Count(&count)
 		if result.Error != nil {
 			log.Err(result.Error)
 			return result.Error
@@ -412,7 +413,7 @@ func (s PostgresStore) GetQueueTaskCounts(req *corndogsv1alpha1.GetQueueTaskCoun
 	var count int64 = 0
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{}
-		rows, err := DB.Model(model).Select("queue", "COUNT(queue)").Group("queue").Rows()
+		rows, err := tx.Model(model).Select("queue", "COUNT(queue)").Group("queue").Rows()
 		defer rows.Close()
 		if err != nil {
 			log.Err(err)
@@ -425,7 +426,7 @@ func (s PostgresStore) GetQueueTaskCounts(req *corndogsv1alpha1.GetQueueTaskCoun
 			queues[key] = value
 		}
 
-		result := DB.Model(model).Count(&count)
+		result := tx.Model(model).Count(&count)
 		if result.Error != nil {
 			log.Err(result.Error)
 			return result.Error
@@ -443,7 +444,7 @@ func (s PostgresStore) GetTaskStateCounts(req *corndogsv1alpha1.GetTaskStateCoun
 	var count int64 = 0
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{}
-		rows, err := DB.Model(model).Select("current_state", "COUNT(current_state)").Where("queue = ?", req.Queue).Group("current_state").Rows()
+		rows, err := tx.Model(model).Select("current_state", "COUNT(current_state)").Where("queue = ?", req.Queue).Group("current_state").Rows()
 		defer rows.Close()
 		if err != nil {
 			log.Err(err)
@@ -456,7 +457,7 @@ func (s PostgresStore) GetTaskStateCounts(req *corndogsv1alpha1.GetTaskStateCoun
 			stateCounts[key] = value
 		}
 
-		result := DB.Model(model).Where("queue = ?", req.Queue).Count(&count)
+		result := tx.Model(model).Where("queue = ?", req.Queue).Count(&count)
 		if result.Error != nil {
 			log.Err(result.Error)
 			return result.Error
@@ -473,7 +474,7 @@ func (s PostgresStore) GetQueueAndStateCounts(req *corndogsv1alpha1.GetQueueAndS
 	queueAndStateCounts := make(map[string]*corndogsv1alpha1.QueueAndStateCounts)
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		model := models.Task{}
-		rows, err := DB.Model(model).Select("queue", "current_state", "COUNT(current_state)").Group("queue").Group("current_state").Rows()
+		rows, err := tx.Model(model).Select("queue", "current_state", "COUNT(current_state)").Group("queue").Group("current_state").Rows()
 		if err != nil {
 			log.Err(err)
 			return err
