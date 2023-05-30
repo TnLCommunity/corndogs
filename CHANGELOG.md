@@ -1,3 +1,10 @@
+## [1.3.13](https://github.com/TnLCommunity/corndogs/compare/v1.3.12...v1.3.13) (2023-05-30)
+
+
+### Bug Fixes
+
+* adjust indexes for scale and upgrade packages ([96d6300](https://github.com/TnLCommunity/corndogs/commit/96d6300846b780a3df45d9501fe05141a1a6c1f3))
+
 ## [1.3.12](https://github.com/TnLCommunity/corndogs/compare/v1.3.11...v1.3.12) (2023-05-24)
 
 
