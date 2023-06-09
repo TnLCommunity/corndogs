@@ -19,12 +19,12 @@ func (s *V1Alpha1Server) UpdateTask(ctx context.Context, req *corndogsv1alpha1.U
 	if req.AutoTargetState == "" {
 		req.AutoTargetState = req.NewState + config.DefaultWorkingSuffix
 	}
-	response, err := store.AppStore.UpdateTask(req)
+	response, err := store.AppStore.UpdateTask(ctx, req)
 	return response, err
 }
 
 func (s *V1Alpha1Server) CompleteTask(ctx context.Context, req *corndogsv1alpha1.CompleteTaskRequest) (*corndogsv1alpha1.CompleteTaskResponse, error) {
-	response, err := store.AppStore.CompleteTask(req)
+	response, err := store.AppStore.CompleteTask(ctx, req)
 	if config.PrometheusEnabled && err == nil {
 		metrics.CompletedTasksTotal.Inc()
 	}
@@ -32,7 +32,7 @@ func (s *V1Alpha1Server) CompleteTask(ctx context.Context, req *corndogsv1alpha1
 }
 
 func (s *V1Alpha1Server) CancelTask(ctx context.Context, req *corndogsv1alpha1.CancelTaskRequest) (*corndogsv1alpha1.CancelTaskResponse, error) {
-	response, err := store.AppStore.CancelTask(req)
+	response, err := store.AppStore.CancelTask(ctx, req)
 	if config.PrometheusEnabled && err == nil {
 		metrics.CanceledTasksTotal.Inc()
 	}
@@ -40,7 +40,7 @@ func (s *V1Alpha1Server) CancelTask(ctx context.Context, req *corndogsv1alpha1.C
 }
 
 func (s *V1Alpha1Server) CleanUpTimedOut(ctx context.Context, req *corndogsv1alpha1.CleanUpTimedOutRequest) (*corndogsv1alpha1.CleanUpTimedOutResponse, error) {
-	response, err := store.AppStore.CleanUpTimedOut(req)
+	response, err := store.AppStore.CleanUpTimedOut(ctx, req)
 	if config.PrometheusEnabled && err == nil {
 		metrics.TimedOutTasksTotal.Inc()
 	}

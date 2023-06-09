@@ -1,6 +1,7 @@
 package postgresstore
 
 import (
+	"context"
 	"embed"
 	"errors"
 	"fmt"
@@ -62,11 +63,11 @@ func (s PostgresStore) Initialize() (func(), error) {
 	return func() { sqlDb.Close() }, nil
 }
 
-func (s PostgresStore) SubmitTask(req *corndogsv1alpha1.SubmitTaskRequest) (*corndogsv1alpha1.SubmitTaskResponse, error) {
+func (s PostgresStore) SubmitTask(ctx context.Context, req *corndogsv1alpha1.SubmitTaskRequest) (*corndogsv1alpha1.SubmitTaskResponse, error) {
 	taskProto := &corndogsv1alpha1.Task{}
 	newUuid, _ := uuid.NewRandom()
 
-	err := DB.Transaction(func(tx *gorm.DB) error {
+	err := DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		model := models.Task{
 			UUID:            newUuid.String(),
 			Queue:           req.Queue,
@@ -88,9 +89,9 @@ func (s PostgresStore) SubmitTask(req *corndogsv1alpha1.SubmitTaskRequest) (*cor
 	return &corndogsv1alpha1.SubmitTaskResponse{Task: taskProto}, err
 }
 
-func (s PostgresStore) MustGetTaskStateByID(req *corndogsv1alpha1.GetTaskStateByIDRequest) (*corndogsv1alpha1.GetTaskStateByIDResponse, error) {
+func (s PostgresStore) MustGetTaskStateByID(ctx context.Context, req *corndogsv1alpha1.GetTaskStateByIDRequest) (*corndogsv1alpha1.GetTaskStateByIDResponse, error) {
 	taskProto := &corndogsv1alpha1.Task{}
-	err := DB.Transaction(func(tx *gorm.DB) error {
+	err := DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		model := models.Task{UUID: req.Uuid}
 		result := tx.First(&model)
 		if result.Error != nil {
@@ -124,10 +125,10 @@ func (s PostgresStore) MustGetTaskStateByID(req *corndogsv1alpha1.GetTaskStateBy
 	return &corndogsv1alpha1.GetTaskStateByIDResponse{Task: taskProto}, err
 }
 
-func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*corndogsv1alpha1.GetNextTaskResponse, error) {
+func (s PostgresStore) GetNextTask(ctx context.Context, req *corndogsv1alpha1.GetNextTaskRequest) (*corndogsv1alpha1.GetNextTaskResponse, error) {
 	// TODO: This may be something that can be simplified, determine that and do so or explain why it can't
 	taskProto := &corndogsv1alpha1.Task{}
-	err := DB.Transaction(func(tx *gorm.DB) error {
+	err := DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		model := models.Task{}
 		var nextUuid string
 		result := tx.Raw(
@@ -218,9 +219,9 @@ func (s PostgresStore) GetNextTask(req *corndogsv1alpha1.GetNextTaskRequest) (*c
 	return &corndogsv1alpha1.GetNextTaskResponse{Task: taskProto}, err
 }
 
-func (s PostgresStore) UpdateTask(req *corndogsv1alpha1.UpdateTaskRequest) (*corndogsv1alpha1.UpdateTaskResponse, error) {
+func (s PostgresStore) UpdateTask(ctx context.Context, req *corndogsv1alpha1.UpdateTaskRequest) (*corndogsv1alpha1.UpdateTaskResponse, error) {
 	taskProto := &corndogsv1alpha1.Task{}
-	err := DB.Transaction(func(tx *gorm.DB) error {
+	err := DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		model := models.Task{
 			UUID:         req.Uuid,
 			Queue:        req.Queue,
@@ -266,9 +267,9 @@ func (s PostgresStore) UpdateTask(req *corndogsv1alpha1.UpdateTaskRequest) (*cor
 	return &corndogsv1alpha1.UpdateTaskResponse{Task: taskProto}, err
 }
 
-func (s PostgresStore) CompleteTask(req *corndogsv1alpha1.CompleteTaskRequest) (*corndogsv1alpha1.CompleteTaskResponse, error) {
+func (s PostgresStore) CompleteTask(ctx context.Context, req *corndogsv1alpha1.CompleteTaskRequest) (*corndogsv1alpha1.CompleteTaskResponse, error) {
 	taskProto := &corndogsv1alpha1.Task{}
-	err := DB.Transaction(func(tx *gorm.DB) error {
+	err := DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// Queue and CurrentState are required to validate you know the current state
 		// and not accidentally pass something someone else is working on
 		model := models.Task{
@@ -308,9 +309,9 @@ func (s PostgresStore) CompleteTask(req *corndogsv1alpha1.CompleteTaskRequest) (
 	return &corndogsv1alpha1.CompleteTaskResponse{Task: taskProto}, err
 }
 
-func (s PostgresStore) CancelTask(req *corndogsv1alpha1.CancelTaskRequest) (*corndogsv1alpha1.CancelTaskResponse, error) {
+func (s PostgresStore) CancelTask(ctx context.Context, req *corndogsv1alpha1.CancelTaskRequest) (*corndogsv1alpha1.CancelTaskResponse, error) {
 	taskProto := &corndogsv1alpha1.Task{}
-	err := DB.Transaction(func(tx *gorm.DB) error {
+	err := DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// Queue and CurrentState are required to validate you know the current state
 		// and not accidentally pass something someone else is working on
 		model := models.Task{
@@ -352,9 +353,9 @@ func (s PostgresStore) CancelTask(req *corndogsv1alpha1.CancelTaskRequest) (*cor
 	return &corndogsv1alpha1.CancelTaskResponse{Task: taskProto}, err
 }
 
-func (s PostgresStore) CleanUpTimedOut(req *corndogsv1alpha1.CleanUpTimedOutRequest) (*corndogsv1alpha1.CleanUpTimedOutResponse, error) {
+func (s PostgresStore) CleanUpTimedOut(ctx context.Context, req *corndogsv1alpha1.CleanUpTimedOutRequest) (*corndogsv1alpha1.CleanUpTimedOutResponse, error) {
 	var count int64 = 0
-	err := DB.Transaction(func(tx *gorm.DB) error {
+	err := DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		model := models.Task{}
 		result := tx.Model(model).Where(`
 			timeout > 0 AND
@@ -384,10 +385,10 @@ func (s PostgresStore) CleanUpTimedOut(req *corndogsv1alpha1.CleanUpTimedOutRequ
 	return &corndogsv1alpha1.CleanUpTimedOutResponse{TimedOut: count}, err
 }
 
-func (s PostgresStore) GetQueues(req *corndogsv1alpha1.GetQueuesRequest) (*corndogsv1alpha1.GetQueuesResponse, error) {
+func (s PostgresStore) GetQueues(ctx context.Context, req *corndogsv1alpha1.GetQueuesRequest) (*corndogsv1alpha1.GetQueuesResponse, error) {
 	queues := []string{}
 	var count int64 = 0
-	err := DB.Transaction(func(tx *gorm.DB) error {
+	err := DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		model := models.Task{}
 		result := tx.Model(model).Select("queue").Distinct().Find(&queues)
 		if result.Error != nil {
@@ -408,21 +409,24 @@ func (s PostgresStore) GetQueues(req *corndogsv1alpha1.GetQueuesRequest) (*cornd
 	return &corndogsv1alpha1.GetQueuesResponse{Queues: queues, TotalTaskCount: count}, err
 }
 
-func (s PostgresStore) GetQueueTaskCounts(req *corndogsv1alpha1.GetQueueTaskCountsRequest) (*corndogsv1alpha1.GetQueueTaskCountsResponse, error) {
+func (s PostgresStore) GetQueueTaskCounts(ctx context.Context, req *corndogsv1alpha1.GetQueueTaskCountsRequest) (*corndogsv1alpha1.GetQueueTaskCountsResponse, error) {
 	queues := make(map[string]int64)
 	var count int64 = 0
-	err := DB.Transaction(func(tx *gorm.DB) error {
+	err := DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		model := models.Task{}
 		rows, err := tx.Model(model).Select("queue", "COUNT(queue)").Group("queue").Rows()
-		defer rows.Close()
 		if err != nil {
 			log.Err(err)
 			return err
 		}
+		defer rows.Close()
 		for rows.Next() {
 			var key string
 			var value int64
-			rows.Scan(&key, &value)
+			err = rows.Scan(&key, &value)
+			if err != nil {
+				return err
+			}
 			queues[key] = value
 		}
 
@@ -439,21 +443,26 @@ func (s PostgresStore) GetQueueTaskCounts(req *corndogsv1alpha1.GetQueueTaskCoun
 	}
 	return &corndogsv1alpha1.GetQueueTaskCountsResponse{QueueCounts: queues, TotalTaskCount: count}, err
 }
-func (s PostgresStore) GetTaskStateCounts(req *corndogsv1alpha1.GetTaskStateCountsRequest) (*corndogsv1alpha1.GetTaskStateCountsResponse, error) {
+
+func (s PostgresStore) GetTaskStateCounts(ctx context.Context, req *corndogsv1alpha1.GetTaskStateCountsRequest) (*corndogsv1alpha1.GetTaskStateCountsResponse, error) {
 	stateCounts := make(map[string]int64)
 	var count int64 = 0
-	err := DB.Transaction(func(tx *gorm.DB) error {
+	err := DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		model := models.Task{}
 		rows, err := tx.Model(model).Select("current_state", "COUNT(current_state)").Where("queue = ?", req.Queue).Group("current_state").Rows()
-		defer rows.Close()
 		if err != nil {
 			log.Err(err)
 			return err
 		}
+		defer rows.Close()
 		for rows.Next() {
 			var key string
 			var value int64
-			rows.Scan(&key, &value)
+			err = rows.Scan(&key, &value)
+			if err != nil {
+				log.Err(err)
+				return err
+			}
 			stateCounts[key] = value
 		}
 
@@ -470,9 +479,10 @@ func (s PostgresStore) GetTaskStateCounts(req *corndogsv1alpha1.GetTaskStateCoun
 	}
 	return &corndogsv1alpha1.GetTaskStateCountsResponse{Queue: req.Queue, Count: count, StateCounts: stateCounts}, err
 }
-func (s PostgresStore) GetQueueAndStateCounts(req *corndogsv1alpha1.GetQueueAndStateCountsRequest) (*corndogsv1alpha1.GetQueueAndStateCountsResponse, error) {
+
+func (s PostgresStore) GetQueueAndStateCounts(ctx context.Context, req *corndogsv1alpha1.GetQueueAndStateCountsRequest) (*corndogsv1alpha1.GetQueueAndStateCountsResponse, error) {
 	queueAndStateCounts := make(map[string]*corndogsv1alpha1.QueueAndStateCounts)
-	err := DB.Transaction(func(tx *gorm.DB) error {
+	err := DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		model := models.Task{}
 		rows, err := tx.Model(model).Select("queue", "current_state", "COUNT(current_state)").Group("queue").Group("current_state").Rows()
 		if err != nil {
@@ -484,7 +494,11 @@ func (s PostgresStore) GetQueueAndStateCounts(req *corndogsv1alpha1.GetQueueAndS
 			var queue string
 			var state string
 			var stateCount int64
-			rows.Scan(&queue, &state, &stateCount)
+			err = rows.Scan(&queue, &state, &stateCount)
+			if err != nil {
+				log.Err(err)
+				return err
+			}
 			if _, ok := queueAndStateCounts[queue]; !ok {
 				queueAndStateCounts[queue] = &corndogsv1alpha1.QueueAndStateCounts{
 					Queue:       queue,

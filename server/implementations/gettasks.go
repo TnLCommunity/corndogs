@@ -9,7 +9,7 @@ import (
 )
 
 func (s *V1Alpha1Server) GetTaskStateByID(ctx context.Context, req *corndogsv1alpha1.GetTaskStateByIDRequest) (*corndogsv1alpha1.GetTaskStateByIDResponse, error) {
-	response, err := store.AppStore.MustGetTaskStateByID(req)
+	response, err := store.AppStore.MustGetTaskStateByID(ctx, req)
 	return response, err
 }
 
@@ -20,6 +20,6 @@ func (s *V1Alpha1Server) GetNextTask(ctx context.Context, req *corndogsv1alpha1.
 	if req.CurrentState == "" {
 		req.CurrentState = config.DefaultStartingState
 	}
-	response, err := store.AppStore.GetNextTask(req)
+	response, err := store.AppStore.GetNextTask(ctx, req)
 	return response, err
 }
