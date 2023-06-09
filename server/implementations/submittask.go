@@ -28,7 +28,7 @@ func (s *V1Alpha1Server) SubmitTask(ctx context.Context, req *corndogsv1alpha1.S
 	if req.Timeout < 0 {
 		req.Timeout = 0
 	}
-	response, err := store.AppStore.SubmitTask(req)
+	response, err := store.AppStore.SubmitTask(ctx, req)
 	if config.PrometheusEnabled && err == nil {
 		metrics.TasksTotal.Inc()
 	}
