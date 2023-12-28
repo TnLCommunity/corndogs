@@ -87,6 +87,9 @@ func run() error {
 		grpc_prometheus.Register(server)
 		metrics.StartMetricsEndpoint()
 		metrics.InitializeMetrics()
+		if config.PrometheusQueueSizeEnabled {
+			metrics.StartQueueSizeMetric(config.PrometheusQueueSizeInterval, config.PrometheusMetricQueryTimeout)
+		}
 	}
 	// register health service (used in k8s health checks)
 	healthService := implementations.NewHealthChecker()
