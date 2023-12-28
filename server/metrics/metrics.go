@@ -63,7 +63,7 @@ func StartQueueSizeMetric(interval time.Duration, queryTimeout time.Duration) {
 		for range ticker.C {
 			response, err := getQueueAndStateCounts(queryTimeout)
 			if err != nil {
-				log.Err(err).Msg("failed to get queue task counts")
+				log.Err(err).Msg("failed to get queue and state counts for metrics")
 				continue
 			}
 
